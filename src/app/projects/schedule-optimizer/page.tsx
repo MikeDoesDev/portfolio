@@ -4,6 +4,7 @@ import MediaFrame from "@/components/project/MediaFrame";
 import Reveal from "@/components/motion/Reveal";
 import { getProject } from "@/content/projects";
 import PipelineDiagram from "./PipelineDiagram";
+import ScheduleDemo from "./ScheduleDemo";
 
 export const metadata: Metadata = {
   title: "TAMU Schedule Optimizer",
@@ -118,15 +119,20 @@ export default function ScheduleOptimizerPage() {
         </section>
       </Reveal>
 
-      {/* Demo teaser */}
+      {/* Live demo */}
       <Reveal>
         <section>
-          <div className="rounded-xl border border-copper/40 bg-surface p-8">
-            <p className="mono-label mb-3 text-copper">Live demo in progress</p>
-            <p className="max-w-2xl text-muted">
-              A slice of this scoring engine is being ported to run in your browser.
-              Sliders, live re-ranking, real fixture data.
-            </p>
+          <p className="mono-label mb-4 text-copper">Live demo</p>
+          <h2 className="font-heading text-3xl font-bold">
+            Drag the weights. Watch the ranking move.
+          </h2>
+          <p className="mt-4 max-w-2xl text-muted">
+            A slice of the scoring engine, ported to run in your browser against real
+            fixture data — re-ranking every conflict-free schedule as you adjust the
+            sliders.
+          </p>
+          <div className="mt-8">
+            <ScheduleDemo />
           </div>
         </section>
       </Reveal>
