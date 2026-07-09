@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import IntroOverlay from "@/components/intro/IntroOverlay";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/site";
 
 const heading = Space_Grotesk({ variable: "--font-heading", subsets: ["latin"] });
@@ -34,6 +35,7 @@ export default function RootLayout({
         <Script id="intro-flag" strategy="beforeInteractive">
           {`try{if(localStorage.getItem('amc-intro-seen'))document.documentElement.dataset.intro='seen'}catch(e){}`}
         </Script>
+        <IntroOverlay />
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
