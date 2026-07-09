@@ -1,0 +1,59 @@
+"use client";
+
+import { useRef, useState } from "react";
+import { useInView } from "motion/react";
+
+interface EmbedFrameProps {
+  src: string;
+  title: string;
+  /** Aspect ratio as `width / height`, e.g. 16 / 10. */
+  aspect?: number;
+}
+
+/**
+ * Lazy iframe: mounts the embed only when scrolled near the viewport,
+ * with a fullscreen button. Used for self-contained demos in /public/demos.
+ */
+export default function EmbedFrame({ src, title, aspect = 16 / 10 }: EmbedFrameProps) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const inView = useInView(wrapRef, { margin: "40% 0px" });
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <div
+      ref={wrapRef}
+      className="relative overflow-hidden rounded-xl border border-line bg-surface"
+      style={{ aspectRatio: aspect }}
+    >
+      {inView ? (
+        <>
+          <iframe
+            ref={frameRef}
+            src={src}
+            title={title}
+            loading="lazy"
+            onLoad={() => setLoaded(true)}
+            className="h-full w-full"
+          />
+          <button
+            type="button"
+            onClick={() => frameRef.current?.requestFullscreen?.()}
+            className="absolute right-3 top-3 rounded-md border border-line bg-ink/80 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-muted backdrop-blur transition-colors hover:text-fg"
+          >
+            Fullscreen
+          </button>
+          {!loaded && (
+            <p className="absolute inset-0 flex items-center justify-center font-mono text-sm text-muted">
+              Loading demo…
+            </p>
+          )}
+        </>
+      ) : (
+        <p className="absolute inset-0 flex items-center justify-center font-mono text-sm text-muted">
+          Demo loads when visible
+        </p>
+      )}
+    </div>
+  );
+}
