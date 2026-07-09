@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Raspberry Pi 5 — Interactive 3D Blueprint</title>
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --panel: rgba(15, 23, 42, 0.92);
+    --panel-border: rgba(56, 189, 248, 0.25);
+    --accent: #38bdf8;
+    --accent-2: #22c55e;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --chip: rgba(56, 189, 248, 0.14);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  #app { position: fixed; inset: 0; }
+  #scene { position: absolute; inset: 0; }
+  canvas { display: block; }
+
+  /* Top bar */
+  #topbar {
+    position: absolute; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 18px;
+    background: linear-gradient(180deg, rgba(2,6,16,0.85), rgba(2,6,16,0));
+    pointer-events: none; z-index: 10;
+  }
+  #topbar .title { font-size: 16px; font-weight: 700; letter-spacing: 0.2px; }
+  #topbar .title span { color: var(--accent); }
+  #topbar .sub { font-size: 12px; color: var(--text-dim); }
+  .controls { margin-left: auto; display: flex; gap: 8px; pointer-events: auto; }
+  .btn {
+    font: inherit; font-size: 12.5px; font-weight: 600;
+    color: var(--text); background: var(--panel); border: 1px solid var(--panel-border);
+    padding: 8px 12px; border-radius: 9px; cursor: pointer;
+    backdrop-filter: blur(6px); transition: border-color .15s, background .15s, color .15s;
+    white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.active { color: #06121f; background: var(--accent); border-color: var(--accent); }
+
+  /* Side panel */
+  #panel {
+    position: absolute; top: 64px; right: 14px; bottom: 56px; width: 340px; max-width: calc(100vw - 28px);
+    background: var(--panel); border: 1px solid var(--panel-border); border-radius: 14px;
+    backdrop-filter: blur(10px); z-index: 9;
+    display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  }
+  #panel header { padding: 14px 16px 10px; border-bottom: 1px solid rgba(148,163,184,0.12); }
+  #panel header h2 { font-size: 14px; }
+  #panel header p { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+  .panel-body { flex: 1; overflow-y: auto; }
+  .panel-body::-webkit-scrollbar { width: 8px; }
+  .panel-body::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.25); border-radius: 8px; }
+
+  /* Detail view */
+  #detail { padding: 14px 16px; display: none; }
+  #detail.show { display: block; }
+  #detail .badge {
+    display: inline-block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px;
+    color: var(--accent); background: var(--chip); padding: 3px 8px; border-radius: 999px; margin-bottom: 8px;
+  }
+  #detail h3 { font-size: 17px; margin-bottom: 8px; }
+  #detail .desc { font-size: 13.5px; line-height: 1.55; color: #cbd5e1; }
+  #detail .specs { list-style: none; margin: 12px 0 0; }
+  #detail .specs li {
+    font-size: 12.5px; color: var(--text); padding: 6px 0 6px 18px; position: relative;
+    border-top: 1px solid rgba(148,163,184,0.10);
+  }
+  #detail .specs li:before { content: "▸"; position: absolute; left: 0; color: var(--accent-2); }
+  #detail .fun { margin-top: 12px; font-size: 12.5px; font-style: italic; color: var(--text-dim);
+    border-left: 2px solid var(--accent-2); padding-left: 10px; }
+  #detail .back { margin-top: 14px; }
+
+  /* Component list */
+  #list { padding: 8px 8px 16px; }
+  #list.hide { display: none; }
+  .cat { font-size: 10.5px; text-transform: uppercase; letter-spacing: .6px; color: var(--text-dim);
+    padding: 12px 8px 4px; }
+  .row {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; cursor: pointer;
+    font-size: 13px; transition: background .12s;
+  }
+  .row:hover { background: rgba(56,189,248,0.10); }
+  .row .dot { width: 10px; height: 10px; border-radius: 3px; flex: none; box-shadow: 0 0 0 1px rgba(255,255,255,.15) inset; }
+  .row .nm { flex: 1; }
+  .row .sl { font-size: 11px; color: var(--text-dim); }
+
+  /* Tooltip */
+  #tooltip {
+    position: absolute; z-index: 20; pointer-events: none; transform: translate(-50%, -140%);
+    background: rgba(2,6,16,0.92); color: #fff; border: 1px solid var(--accent);
+    font-size: 12px; font-weight: 600; padding: 5px 9px; border-radius: 7px;
+    white-space: nowrap; opacity: 0; transition: opacity .1s;
+  }
+
+  /* Callout labels (annotated-diagram overlay) */
+  #labels { position: absolute; inset: 0; z-index: 8; pointer-events: none; display: none; }
+  #labels svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .leader { stroke: rgba(56,189,248,0.55); stroke-width: 1.4; }
+  .callout {
+    position: absolute; transform: translateY(-50%); pointer-events: auto; cursor: pointer;
+    font-size: 11px; font-weight: 600; color: var(--text);
+    background: rgba(2,6,16,0.86); border: 1px solid var(--panel-border);
+    padding: 3px 7px; border-radius: 6px; white-space: nowrap; backdrop-filter: blur(4px);
+  }
+  .callout:hover { border-color: var(--accent); color: #fff; }
+
+  /* Hint bar */
+  #hint {
+    position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%);
+    z-index: 9; font-size: 12px; color: var(--text-dim);
+    background: var(--panel); border: 1px solid var(--panel-border);
+    padding: 8px 14px; border-radius: 999px; backdrop-filter: blur(6px);
+    display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 380px);
+  }
+  #hint b { color: var(--text); font-weight: 600; }
+
+  /* Loading / error */
+  #status {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 12px; z-index: 30; text-align: center; padding: 24px;
+    background: var(--bg);
+  }
+  #status.hide { display: none; }
+  .spinner { width: 34px; height: 34px; border: 3px solid rgba(56,189,248,0.25); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #status .msg { font-size: 13px; color: var(--text-dim); max-width: 420px; line-height: 1.5; }
+  #status .err { color: #fca5a5; }
+
+  @media (max-width: 720px) {
+    #panel { top: auto; bottom: 0; right: 0; left: 0; width: 100%; height: 46%; border-radius: 14px 14px 0 0; }
+    #hint { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="scene"></div>
+
+  <div id="topbar">
+    <div>
+      <div class="title">Raspberry Pi 5 — <span>Interactive Blueprint</span></div>
+      <div class="sub">Click any part to learn what it does</div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="btn-mode">Blueprint mode</button>
+      <button class="btn" id="btn-labels">Labels</button>
+      <button class="btn" id="btn-rotate">Auto-rotate</button>
+      <button class="btn" id="btn-reset">Reset view</button>
+    </div>
+  </div>
+
+  <aside id="panel">
+    <header>
+      <h2>Components</h2>
+      <p id="panel-sub">Tap a part on the board, or pick one below.</p>
+    </header>
+    <div class="panel-body">
+      <div id="detail"></div>
+      <div id="list"></div>
+    </div>
+  </aside>
+
+  <div id="tooltip"></div>
+
+  <div id="labels"><svg id="leaders"></svg></div>
+
+  <div id="hint">
+    <span><b>Drag</b> rotate</span>
+    <span><b>Scroll</b> zoom</span>
+    <span><b>Right-drag</b> pan</span>
+    <span><b>Click</b> a part</span>
+  </div>
+
+  <div id="status">
+    <div class="spinner"></div>
+    <div class="msg">Loading the 3D board… (first load fetches Three.js from a CDN — needs internet)</div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+// =================================================================
+// COMPONENTS DATA  — placeholder set; replaced with verified research data.
+// Coordinate convention (top-down): origin = board center.
+//   x : left(-) .. right(+)  along the 85mm length   (board: -42.5 .. 42.5)
+//   z : top(-)  .. bottom(+)  along the 56mm width    (board: -28 .. 28)
+//   w = size along x, d = size along z, h = height standing off the board.
+// The 40-pin GPIO header runs along the TOP edge (negative z).
+// =================================================================
+const BOARD = { w: 85, d: 56, t: 1.6, r: 3, holeR: 1.4, holeDx: 29, holeDz: 24.5 };
+const BOARD_TOP = BOARD.t / 2;
+
+let COMPONENTS = [
+  // ---- The board itself ----
+  { id:"pcb-board", name:"Printed Circuit Board (PCB)", shortLabel:"Board", category:"board",
+    isBoard:true, color:"#1f7a3d",
+    whatItDoes:"This is the flat green board that every other part is soldered onto. It is the same credit-card-ish size as every Raspberry Pi before it, so it fits existing cases and add-on boards. The green you see is the solder mask, a protective coating over the copper wiring printed in layers inside the board. The copper traces are like tiny roads that carry power and signals between the chips, ports, and pins.",
+    keySpecs:["Dimensions: 85mm x 56mm x ~1.6mm","Four 3.5mm mounting holes for M2.5 screws","Mounting hole spacing ~58mm x ~49mm (matches Pi 2/3/4)","~2.5mm rounded corner radius","Multi-layer PCB with green solder mask","Same outline/mounting pattern as Pi 4 for case compatibility"],
+    funFact:"The mounting-hole pattern hasn't changed since the Pi 2, so a case from years ago can still hold a brand-new Pi 5." },
+
+  // ---- Core silicon ----
+  { id:"bcm2712-soc", name:"BCM2712 System-on-Chip", shortLabel:"SoC", category:"silicon",
+    x:-3, z:-2, w:15, d:15, h:1.2, color:"#3a3a3c",
+    whatItDoes:"This is the brain of the Raspberry Pi 5 - one single chip that packs in the main processor (CPU), the graphics engine (GPU), and the video hardware all together. It runs the operating system and every program you open, does the actual thinking and math, and draws the picture you see on screen. 'System-on-Chip' just means a whole computer's worth of parts squeezed onto one piece of silicon. Almost everything else on the board exists to feed this chip power, memory, and connections.",
+    keySpecs:["Quad-core (4-core) 64-bit Arm Cortex-A76 CPU @ 2.4 GHz","512 KB L2 cache per core + 2 MB shared L3 cache","VideoCore VII GPU (OpenGL ES 3.1, Vulkan 1.3)","Drives dual 4Kp60 HDMI displays, with HDR","Built on a 16 nm manufacturing process","Made by Broadcom; ~2-3x the CPU performance of the Pi 4"],
+    funFact:"The Cortex-A76 cores are three full microarchitecture generations newer than the Pi 4's chip, which is why a Pi 5 feels roughly 2-3x faster even though it is the same credit-card size." },
+
+  { id:"lpddr4x-ram", name:"LPDDR4X SDRAM Memory", shortLabel:"RAM", category:"silicon",
+    x:14, z:-2, w:11, d:11, h:1.0, color:"#1c1c1e",
+    whatItDoes:"This is the computer's short-term working memory. When you open an app or a web page, its data is loaded here so the processor can reach it almost instantly - far faster than reading from the microSD card. The more RAM you have, the more programs and browser tabs you can keep open at once before things slow down. Everything in RAM is wiped when you power off; it is a fast scratchpad, not permanent storage.",
+    keySpecs:["LPDDR4X running at 4267 MT/s","32-bit memory interface to the SoC","Up to ~17 GB/s of memory bandwidth","Capacity options: 2, 4, 8, and 16 GB","'LP' = Low Power, designed to sip energy","Soldered to the board - cannot be upgraded or swapped"],
+    funFact:"The 'X' in LPDDR4X means it runs its data lines at a lower 0.6 V instead of 1.1 V, saving power and heat while still hitting high speeds." },
+
+  { id:"rp1-io-controller", name:"RP1 I/O Controller", shortLabel:"RP1", category:"silicon",
+    x:20, z:13, w:12, d:12, h:1.1, color:"#2e2e30",
+    whatItDoes:"This is a custom chip designed by Raspberry Pi themselves that acts like the board's traffic controller for connections to the outside world. Instead of the main processor handling every USB stick, network cable, camera, and GPIO pin directly, the RP1 takes care of all that and talks to the main SoC over a single fast internal link. Think of it as the 'connections manager' so the brain (SoC) can focus on computing. It is the reason the Pi 5's USB and networking are much faster and more reliable than earlier Pi models.",
+    keySpecs:["2x USB 3.0 (5 Gbps each, simultaneous) + 2x USB 2.0","Gigabit Ethernet controller","Two 4-lane MIPI transceivers (camera or display)","Drives the 40-pin 3.3V GPIO header","Analogue composite video output","Connects to the BCM2712 over a 4-lane PCIe 2.0 link","Raspberry Pi's first in-house silicon of this scale"],
+    funFact:"RP1 is the southbridge Raspberry Pi spent years building in-house - it is why the Pi 5 can run two USB 3.0 ports at full 5 Gbps at the same time, something the Pi 4 could not do." },
+
+  // ---- Right edge: USB + Ethernet ----
+  { id:"usb3-port-stack", name:"Dual USB 3.0 Ports (Blue)", shortLabel:"USB 3.0 x2", category:"port",
+    x:37, z:-15, w:17, d:13, h:16, color:"#2244aa",
+    whatItDoes:"These are the two fast USB sockets, easy to spot because the plastic inside is blue. You plug in things like a fast USB stick, an external SSD, or a webcam. They move data much quicker than the older black USB ports, so they are the ones to use when speed matters.",
+    keySpecs:["2 x USB 3.0 (Type-A) ports","Simultaneous 5 Gbps operation (5 Gbps each)","Roughly 10x faster than USB 2.0's 480 Mbps","Blue internal connector = USB 3.0","Backward compatible with USB 2.0 / 1.1"],
+    funFact:"On the Pi 5 the USB 3.0 ports run at full 5 Gbps each at the same time, unlike the Pi 4 where they shared a single 5 Gbps link." },
+
+  { id:"usb2-port-stack", name:"Dual USB 2.0 Ports (Black)", shortLabel:"USB 2.0 x2", category:"port",
+    x:37, z:0, w:17, d:13, h:16, color:"#1a1a1a",
+    whatItDoes:"These are the two slower, everyday USB sockets, recognizable by the black plastic inside. They are perfect for things that don't need speed, like a keyboard, a mouse, or a small USB drive. Using them for slow devices keeps the fast blue ports free for storage or cameras.",
+    keySpecs:["2 x USB 2.0 (Type-A) ports","Up to 480 Mbps (Hi-Speed USB)","Black internal connector = USB 2.0","Ideal for keyboards, mice, low-speed peripherals"],
+    funFact:"USB 2.0's 480 Mbps is the bus maximum; in practice these ports are plenty for input devices but slow for moving large files." },
+
+  { id:"gigabit-ethernet-rj45", name:"Gigabit Ethernet (RJ45)", shortLabel:"Gigabit LAN", category:"port",
+    x:35, z:17, w:21, d:16, h:13.5, color:"#3a3a3a",
+    whatItDoes:"This is the network socket for a wired internet connection. You plug a standard Ethernet cable (the kind with a clicky clip) from your router into this jack. A wired connection is usually faster and more reliable than Wi-Fi, which is great for downloads, servers, or streaming.",
+    keySpecs:["Gigabit Ethernet (10/100/1000 Mbps)","Standard RJ45 connector (8P8C)","PoE+ support via separate PoE+ HAT","Two integrated status LEDs (link / activity)","On Pi 5, Ethernet swapped sides vs the Pi 4"],
+    funFact:"With the add-on PoE+ HAT, a single network cable can carry both internet data AND the power to run the whole Pi, so no separate power adapter is needed." },
+
+  // ---- Bottom edge: video + power ----
+  { id:"micro-hdmi-0", name:"Micro-HDMI Port 0 (HDMI0)", shortLabel:"HDMI0", category:"port",
+    x:-12, z:25.5, w:6.5, d:7.5, h:3, color:"#1c1c1c",
+    whatItDoes:"This is a tiny video output socket that sends picture and sound to a monitor or TV. It is the small 'micro' size of HDMI, so you need a micro-HDMI-to-regular-HDMI cable or adapter. HDMI0 is the main port the Pi uses first, so if you only plug in one screen, use this one. It can drive a sharp 4K display at a smooth 60 frames per second.",
+    keySpecs:["Connector: micro-HDMI (HDMI Type D)","Part of dual 4Kp60 HDMI output with HDR","Max per port: 4K (3840x2160) at 60Hz","Carries both video and audio over one cable","The port nearest the USB-C power jack"],
+    funFact:"Two micro-HDMI ports let one Pi 5 run two separate 4K monitors at once - a feature the Pi only gained starting with the Pi 4." },
+
+  { id:"micro-hdmi-1", name:"Micro-HDMI Port 1 (HDMI1)", shortLabel:"HDMI1", category:"port",
+    x:-2, z:25.5, w:6.5, d:7.5, h:3, color:"#1c1c1c",
+    whatItDoes:"This is the second tiny video output, identical to HDMI0. You use it when you want a second monitor connected at the same time for a dual-screen setup. Like HDMI0, it needs a micro-HDMI cable or adapter, not a standard HDMI plug. Each of the two ports can independently push out a 4K picture at 60 frames per second.",
+    keySpecs:["Connector: micro-HDMI (HDMI Type D)","Second of the two ports for dual 4Kp60 output","Max: 4K (3840x2160) at 60Hz","Sits between HDMI0 and the board interior","Carries video plus audio"],
+    funFact:"The two micro-HDMI sockets sit so close together that fat HDMI adapters can collide - which is why dedicated micro-HDMI cables are popular." },
+
+  { id:"usb-c-power-input", name:"USB-C Power Input", shortLabel:"USB-C PWR", category:"power",
+    x:-24, z:25.5, w:9, d:7.5, h:3.2, color:"#b0b0b0",
+    whatItDoes:"This is where you plug in the power cable - it is the Pi's wall-outlet connection. It uses the same reversible USB-C plug shape as a modern phone charger, so it goes in either way up. Unlike the USB-C on a phone, this port only takes in electricity; it does not move data. The Pi talks to a smart charger through this port to ask for exactly the power it needs.",
+    keySpecs:["Connector: USB-C, power input only (no data)","Input: 5V at 5A DC (25W) with USB-PD support","Recommended: Raspberry Pi 27W USB-C supply","Negotiates over USB-PD to unlock full 5A","With a basic 5V/3A supply it limits peripheral power"],
+    funFact:"If the Pi cannot negotiate 5A, it still boots but caps total USB output at 600mA - so a weak charger can leave a hard drive starved for power." },
+
+  { id:"power-button", name:"Power / Standby Button", shortLabel:"PWR BTN", category:"power",
+    x:-34, z:25, w:4, d:4, h:2.5, color:"#3a3a3a",
+    whatItDoes:"This is the first real on/off button on a full-size Raspberry Pi. When the Pi is off but still plugged in, one short press wakes it up and boots it. When it is running, pressing it lets you shut down cleanly instead of yanking the cable. On the desktop a single press pops up a shutdown/reboot menu; a double press triggers a clean shutdown.",
+    keySpecs:["Momentary push button (board ref J2)","Single press: power on / boot","Running: short press opens shutdown menu","Double press: clean shutdown","First power button on a flagship full-size Pi"],
+    funFact:"Holding the button is not needed - the power chip does a graceful software shutdown, avoiding the file-corruption risk of just pulling the plug." },
+
+  { id:"pmic-da9091", name:"DA9091 Power Management IC", shortLabel:"PMIC", category:"power",
+    x:-15, z:10, w:6, d:6, h:1.0, color:"#2b2b2b",
+    whatItDoes:"Think of this chip as the Pi's electrical brain for power. It takes the 5 volts coming in from the USB-C port and converts it into all the different, precise voltages the processor, memory, and other chips each need. It also negotiates with the charger over the cable, watches the power button, and keeps the clock ticking. It is the single most important new power chip introduced on the Pi 5.",
+    keySpecs:["Renesas DA9091, codenamed 'Gilmour'","Eight built-in switch-mode power supplies","Quad-phase core supply up to 20A to the CPU","Integrated real-time clock (RTC)","Handles USB-PD power negotiation","Drives the PC-style power button"],
+    funFact:"Because the PMIC contains the real-time clock, a Pi 5 with a small backup battery can remember the date and time even while fully unplugged." },
+
+  // ---- GPIO + small headers ----
+  { id:"gpio-40-pin-header", name:"40-pin GPIO Header", shortLabel:"40-pin GPIO", category:"header",
+    x:1.5, z:-24.5, w:51, d:5, h:8.5, color:"#1a1a1a", pins:{cols:20, rows:2},
+    whatItDoes:"This is the big double row of 40 metal pins along the top edge - the Pi's main way of talking to the outside world of electronics. You connect wires, buttons, sensors, LEDs, and add-on boards (called HATs) here. Some pins send and receive simple on/off signals you control in code, while others supply power (3.3V and 5V) or a shared ground. It is the single most-used feature for anyone building hardware projects.",
+    keySpecs:["40 pins in 2 rows of 20","2.54mm (0.1 inch) standard pitch","26 usable GPIO lines, 3.3V logic","Provides 3.3V, 5V, and GND power pins","Supports I2C, SPI, UART, PWM, and PCM","Pin-compatible with Pi 2/3/4 HATs"],
+    funFact:"The 2.54mm pin spacing is an old electronics standard chosen so jumper wires and breadboards from decades ago still plug right in." },
+
+  { id:"uart-debug-header", name:"UART Debug / Serial Header", shortLabel:"UART Debug", category:"header",
+    x:-15, z:19, w:4, d:2.5, h:2.5, color:"#e8e3d0",
+    whatItDoes:"This little 3-pin socket is a direct text-only line into the Pi's brain, used mainly when something has gone wrong. With a special cable you can watch the Pi's start-up messages on another computer, even if the screen and network are dead. Beginners rarely touch it, but it is the go-to tool for diagnosing a Pi that will not boot. The three pins are simply transmit, receive, and ground.",
+    keySpecs:["3 pins (TX, RX, GND)","JST-SH connector, 1.0mm pitch","3.3V logic level","Default serial console for boot/debug output","Pairs with the official Raspberry Pi Debug Probe"],
+    funFact:"Because it shows boot messages with no monitor attached, this port is often the only way to find out why a 'dead' Pi is actually refusing to start." },
+
+  { id:"poe-plus-header", name:"PoE+ Header", shortLabel:"PoE+", category:"power",
+    x:28, z:12, w:5, d:5, h:6, color:"#2b2b2b",
+    whatItDoes:"These four pins let the Pi receive its power through the same Ethernet network cable that carries its internet - a trick called Power over Ethernet (PoE). You cannot use it on its own; you add an official PoE+ HAT on top, and these pins feed it the raw power tapped from the network jack. This means one cable can both connect and power the Pi, which is handy where a wall plug is awkward.",
+    keySpecs:["4 pins, 2 rows of 2","Carries power tapped from the Ethernet magnetics","Requires the official PoE+ HAT to use","Supports IEEE 802.3at (PoE+) up to ~25.5W","Relocated near the Ethernet jack on Pi 5"],
+    funFact:"The four pins exist so the HAT can grab power no matter which wire pairs in the Ethernet cable happen to be carrying it." },
+
+  { id:"rtc-battery-connector", name:"RTC Battery Connector", shortLabel:"RTC Battery", category:"power",
+    x:-10, z:19, w:3, d:2.5, h:2.5, color:"#e8e3d0",
+    whatItDoes:"This little 2-pin socket connects a small coin-cell battery so the Pi can remember the correct date and time even while fully powered off. The Pi 5 is the first model with a built-in real-time clock, but it needs this backup battery to keep ticking without mains power. Without it, the Pi forgets the time on every shutdown and relies on the internet to reset the clock at boot.",
+    keySpecs:["2 pins (positive and ground)","JST-SH connector, 1.0mm pitch","Powers the BCM2712's built-in real-time clock","Holds an external rechargeable coin-cell","New to Pi 5 - earlier Pis had no onboard RTC"],
+    funFact:"It can even wake the Pi from a near-off state at a scheduled time, turning the board into a low-power alarm clock." },
+
+  { id:"fan-cooler-connector", name:"Fan / Active Cooler Connector", shortLabel:"Fan (4-pin)", category:"cooling",
+    x:29, z:-19, w:4.5, d:3, h:2.5, color:"#f2efe2",
+    whatItDoes:"This 4-pin socket powers and controls a small cooling fan, such as the official Raspberry Pi Active Cooler. The Pi 5 runs hot enough that a fan is genuinely useful, and unlike a dumb fan this connector lets the Pi read the fan's speed and adjust it automatically based on temperature. So the fan stays quiet when the Pi is idle and spins up only when things heat up.",
+    keySpecs:["4 pins (5V, GND, PWM control, tachometer)","JST-SH connector, 1.0mm pitch","Temperature-controlled variable speed (PWM)","Reads fan RPM via the tacho pin","Powers the official Active Cooler / Pi 5 Case fan"],
+    funFact:"Because the Pi senses fan speed, it can warn you in software if the fan stalls or is unplugged." },
+
+  // ---- Left side: flex connectors + storage ----
+  { id:"mipi-cam-disp-0", name:"MIPI Camera/Display 0 (CSI/DSI)", shortLabel:"CAM/DISP 0", category:"connector",
+    x:-40, z:16, w:3, d:12, h:2.5, color:"#3a2f1c",
+    whatItDoes:"This is a thin flat socket where you slide in a flexible ribbon cable. On the Pi 5 each of these connectors is 'bi-directional', which is the key upgrade: the SAME socket can talk to either a camera OR a screen. So you plug in a Raspberry Pi Camera Module here to take photos and video, or you plug in an official touchscreen display. Because there are two of these connectors, you can run two cameras, two displays, or one of each at the same time.",
+    keySpecs:["4-lane MIPI interface (CSI camera / DSI display)","Bi-directional: works as camera OR display","22-pin FFC/FPC connector, 0.5mm pitch","Needs the Pi 5 adapter cable (not the old Pi 4 cable)","I2C and GPIO control lines at 3.3 V"],
+    funFact:"On older Pis the camera and display each had their own separate, differently-sized sockets; the Pi 5 made them identical and interchangeable." },
+
+  { id:"mipi-cam-disp-1", name:"MIPI Camera/Display 1 (CSI/DSI)", shortLabel:"CAM/DISP 1", category:"connector",
+    x:-40, z:3, w:3, d:12, h:2.5, color:"#3a2f1c",
+    whatItDoes:"This is the second of the two identical flat ribbon-cable sockets. It does exactly the same job as the first one: it can connect a camera (to capture images) or a display (to show a picture), because it is the same bi-directional design. Having two means you are not forced to choose - for example an AI camera on this one while the official touchscreen runs on the other.",
+    keySpecs:["4-lane MIPI interface (CSI camera / DSI display)","Bi-directional: works as camera OR display","22-pin FFC/FPC connector, 0.5mm pitch","Identical and interchangeable with the other MIPI connector"],
+    funFact:"Two 4-lane MIPI links is why the Pi 5 can drive a camera and a touchscreen simultaneously without an add-on board." },
+
+  { id:"pcie-fpc-connector", name:"PCIe 2.0 x1 FPC Connector", shortLabel:"PCIe FPC", category:"connector",
+    x:-38, z:-10, w:3.5, d:12, h:3, color:"#1c1c1c",
+    whatItDoes:"This little flat connector is brand new on the Pi 5 and it is a big deal: it exposes a fast PCI Express lane, the same kind of high-speed link a desktop PC uses for its graphics card or SSD. On its own it does nothing, but with a small add-on board (an 'M.2 HAT') you plug into it, you can attach an NVMe SSD. That lets the Pi boot and run from a real solid-state drive instead of a microSD card, which is much faster and far more reliable.",
+    keySpecs:["Single-lane PCI Express 2.0 (PCIe 2.0 x1)","Raw link rate 5 GT/s (~500 MB/s each direction)","Vertically-mounted flat-flex (FPC) connector","Requires an M.2 HAT (most common use: NVMe SSD)","Often pushed to Gen 3 speeds (~1 GB/s) via config"],
+    funFact:"The PCIe connector physically took over the exact board space that the Pi 4's old display ribbon connector occupied." },
+
+  { id:"microsd-card-slot", name:"microSD Card Slot", shortLabel:"microSD", category:"storage",
+    x:-30, z:12, w:15, d:12, h:1.4, y:-1.5, color:"#9a9a9a",
+    whatItDoes:"This is the slot for a microSD memory card, the small fingernail-sized card that normally holds the Pi's operating system and all your files - the same kind of card used in phones and cameras. For most beginners this is where Raspberry Pi OS lives, so the Pi boots from whatever card you insert. It is on the underside so the card tucks neatly under the board.",
+    keySpecs:["microSD (TF) card slot, push-push style","Supports high-speed SDR104 mode","Up to ~104 MB/s (roughly double the Pi 4)","Located on the underside of the board","Primary boot device for most users"],
+    funFact:"The Pi 5 doubled microSD speed by enabling SDR104, so the same card reads about twice as fast as on a Pi 4." },
+
+  // ---- Wireless + indicators ----
+  { id:"wireless-wifi-bt", name:"Wi-Fi + Bluetooth Module", shortLabel:"WiFi/BT", category:"wireless",
+    x:-25, z:-15, w:12, d:10, h:1.5, color:"#b8b8bc",
+    whatItDoes:"This single tiny chip gives the Pi both Wi-Fi and Bluetooth, so it can join your home network and talk to wireless gadgets without any cables. The Wi-Fi works on two frequency bands (2.4GHz and 5GHz), letting it pick the less crowded, faster one. Bluetooth lets it pair with things like keyboards, mice, speakers, or sensors. A little antenna built into the board does the actual sending and receiving of radio waves.",
+    keySpecs:["Infineon CYW43455 combo module","Wi-Fi: dual-band 2.4 + 5 GHz, 802.11ac (Wi-Fi 5)","Bluetooth 5.0 + Bluetooth Low Energy (BLE)","Single stream, up to ~433 Mbps on Wi-Fi 5","Onboard antenna - no external antenna jack"],
+    funFact:"It's the same wireless chip family as the Pi 4, but the Pi 5 wires it to the main chip over a faster link, so real-world Wi-Fi can be noticeably quicker." },
+
+  { id:"status-leds", name:"Status LEDs (PWR + STAT)", shortLabel:"Status LEDs", category:"indicator",
+    x:-29, z:20, w:3.5, d:2, h:1.0, color:"#33dd55",
+    whatItDoes:"These two little lights tell you at a glance what the Pi is doing. The green one (labelled STAT, the old 'ACT' light) flickers as the Pi reads or writes its microSD card, so it shows the system is alive and working. The red one (labelled PWR) reports power: on the Pi 5 it stays off in normal use and only flashes if the power supply can't deliver enough current. If green blinks in special patterns at boot, it's spelling out an error code.",
+    keySpecs:["Green LED (STAT): activity / SD card access","Red LED (PWR): off by default, flashes on a power fault","Two separate discrete LEDs","Green LED blinks coded patterns to report boot errors","Extra link/activity LEDs are built into the Ethernet jack"],
+    funFact:"Unlike older Pis where the red light glowed steadily to say 'I have power,' the Pi 5's red PWR LED stays dark normally - if it lights up, it's a warning." },
+];
+
+// =================================================================
+// ENGINE
+// =================================================================
+const sceneEl = document.getElementById('scene');
+const statusEl = document.getElementById('status');
+const tooltipEl = document.getElementById('tooltip');
+
+let renderer, scene, camera, controls, raycaster, pointer;
+let blueprintMode = false;
+let hoveredId = null, selectedId = null;
+let grid, keyLight, ground, envTex = null;
+let silkMesh = null;                 // silkscreen text/logo plane (not a clickable part)
+let labelsOn = false, leaderSvg = null;
+const calloutEls = new Map();        // id -> { el, line }
+const parts = new Map();      // id -> { def, group, meshes:[], center:Vector3 }
+const selectables = [];       // groups for raycasting
+let _seed = 1337;
+function rnd() { _seed = (_seed * 1664525 + 1013904223) >>> 0; return _seed / 4294967296; }
+
+function showError(msg) {
+  statusEl.classList.remove('hide');
+  statusEl.innerHTML = '<div class="msg err">' + msg + '</div>';
+}
+
+function roundedRectShape(w, h, r) {
+  const s = new THREE.Shape();
+  const x = -w/2, y = -h/2;
+  s.moveTo(x + r, y);
+  s.lineTo(x + w - r, y);
+  s.absarc(x + w - r, y + r, r, -Math.PI/2, 0, false);
+  s.lineTo(x + w, y + h - r);
+  s.absarc(x + w - r, y + h - r, r, 0, Math.PI/2, false);
+  s.lineTo(x + r, y + h);
+  s.absarc(x + r, y + h - r, r, Math.PI/2, Math.PI, false);
+  s.lineTo(x, y + r);
+  s.absarc(x + r, y + r, r, Math.PI, Math.PI*1.5, false);
+  return s;
+}
+
+function buildBoard(part) {
+  const shape = roundedRectShape(BOARD.w, BOARD.d, BOARD.r);
+  // mounting holes
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    const hole = new THREE.Path();
+    hole.absarc(sx * BOARD.holeDx, sz * BOARD.holeDz, BOARD.holeR, 0, Math.PI*2, true);
+    shape.holes.push(hole);
+  }
+  const geo = new THREE.ExtrudeGeometry(shape, { depth: BOARD.t, bevelEnabled: false });
+  geo.rotateX(-Math.PI/2);
+  geo.center();
+  const group = new THREE.Group();
+  addMesh(group, geo, { color: part.color, roughness: 0.55, metalness: 0.0 });
+  // copper plated rings around the mounting holes
+  const ringGeo = new THREE.TorusGeometry(BOARD.holeR + 0.9, 0.45, 8, 24);
+  ringGeo.rotateX(Math.PI/2);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) for (const yy of [BOARD_TOP, -BOARD_TOP]) {
+    addMesh(group, ringGeo, { color:'#caa24a', metalness:0.9, roughness:0.35, noShadow:true, pos:[sx*BOARD.holeDx, yy, sz*BOARD.holeDz] });
+  }
+  buildPassives(group);   // scattered SMD resistors/capacitors
+  group.userData.partId = part.id;
+  scene.add(group);
+  selectables.push(group);
+  parts.set(part.id, { def: part, group, meshes: collectMeshes(group), center: new THREE.Vector3(0, 6, 0) });
+  buildSilkscreen();      // printed text + Raspberry Pi logo on the board surface
+}
+
+// scatter tiny surface-mount passives in the free spaces between the labeled parts
+function buildPassives(group) {
+  const foot = COMPONENTS.filter(c => !c.isBoard).map(c => ({ x:c.x, z:c.z, w:c.w||4, d:c.d||4 }));
+  const palette = [
+    { c:'#141414', w:1.7, d:0.9 }, { c:'#0e0e0e', w:1.0, d:0.6 },
+    { c:'#b58a5a', w:1.5, d:1.1 }, { c:'#caa24a', w:0.9, d:0.9 }, { c:'#26262c', w:2.4, d:1.5 },
+  ];
+  const free = (x, z) => {
+    for (const f of foot) if (Math.abs(x-f.x) < f.w/2 + 2 && Math.abs(z-f.z) < f.d/2 + 2) return false;
+    for (const sx of [-1,1]) for (const sz of [-1,1]) if (Math.hypot(x - sx*BOARD.holeDx, z - sz*BOARD.holeDz) < BOARD.holeR + 3.5) return false;
+    return true;
+  };
+  let placed = 0;
+  for (let i = 0; i < 700 && placed < 48; i++) {
+    const x = (rnd()-0.5)*(BOARD.w-9), z = (rnd()-0.5)*(BOARD.d-9);
+    if (!free(x, z)) continue;
+    const pp = palette[(rnd()*palette.length)|0], hh = 0.4 + rnd()*0.6, rot = rnd() < 0.5;
+    addMesh(group, Box(rot?pp.d:pp.w, hh, rot?pp.w:pp.d), { color:pp.c, metalness:0.25, roughness:0.55, noShadow:true, pos:[x, BOARD_TOP + hh/2, z] });
+    placed++;
+  }
+}
+
+// silkscreen: model name + copyright + designators + the Raspberry Pi logo, drawn to a texture
+function buildSilkscreen() {
+  if (silkMesh) { scene.remove(silkMesh); silkMesh = null; }
+  const cw = 2048, ch = Math.round(cw * BOARD.d / BOARD.w);
+  const cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+  const ctx = cv.getContext('2d');
+  const toX = bx => (bx + BOARD.w/2) / BOARD.w * cw;
+  const toY = bz => (bz + BOARD.d/2) / BOARD.d * ch;
+  ctx.fillStyle = 'rgba(223,231,238,0.8)'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = 'bold 60px Arial'; ctx.fillText('Raspberry Pi 5', toX(3), toY(-9.5));
+  ctx.font = '30px Arial'; ctx.fillText('© Raspberry Pi 2023', toX(3), toY(-4.5));
+  ctx.font = '26px Arial';
+  const desig = [['J8',1.5,-20.5],['J2',-34,22],['J14',-15,16.5],['J5',-9.5,16.5],['CAM/DISP',-34,9.5],['PCIe',-34,-3.5],['ETH',31,17],['USB3',31,-15],['USB2',31,0],['FAN J17',28,-22]];
+  for (const [t,bx,bz] of desig) ctx.fillText(t, toX(bx), toY(bz));
+  drawRaspberry(ctx, toX(8.5), toY(8.5), 58);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.anisotropy = 8; tex.colorSpace = THREE.SRGBColorSpace;
+  const geo = new THREE.PlaneGeometry(BOARD.w, BOARD.d); geo.rotateX(-Math.PI/2);
+  silkMesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+    map: tex, transparent: true, alphaTest: 0.12, roughness: 0.85, metalness: 0,
+    polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+  }));
+  silkMesh.position.y = BOARD_TOP + 0.04; silkMesh.renderOrder = 2;
+  scene.add(silkMesh);
+}
+function drawRaspberry(ctx, cx, cy, s) {
+  ctx.save();
+  ctx.fillStyle = 'rgba(125,190,75,0.92)';
+  for (const a of [-0.6, 0.6]) {
+    ctx.save(); ctx.translate(cx, cy - s*0.62); ctx.rotate(a);
+    ctx.beginPath(); ctx.ellipse(0, -s*0.28, s*0.17, s*0.34, 0, 0, Math.PI*2); ctx.fill(); ctx.restore();
+  }
+  ctx.fillStyle = 'rgba(196,42,58,0.93)';
+  const pts = [[0,0.55],[-0.34,0.34],[0.34,0.34],[-0.5,0.0],[0.5,0.0],[0,0.05],[-0.26,-0.34],[0.26,-0.34],[0,-0.3]];
+  for (const [dx,dy] of pts) { ctx.beginPath(); ctx.arc(cx + dx*s*0.62, cy - dy*s*0.6, s*0.19, 0, Math.PI*2); ctx.fill(); }
+  ctx.restore();
+}
+
+function buildComponent(part) {
+  const group = new THREE.Group();
+  const y = (part.y !== undefined) ? part.y : (BOARD_TOP + part.h/2);
+  group.position.set(part.x, y, part.z);
+  (BUILDERS[modelFor(part)] || buildBox)(group, part);
+  group.userData.partId = part.id;
+  scene.add(group);
+  selectables.push(group);
+  const center = new THREE.Vector3(part.x, y + part.h/2 + 1.5, part.z);
+  parts.set(part.id, { def: part, group, meshes: collectMeshes(group), center });
+}
+
+// ---- per-part geometry builders (local origin = part center; x=w, y=h, z=d) ----
+const Box = (x, y, z) => new THREE.BoxGeometry(x, y, z);
+const MAT = {
+  shield:       { color:'#c4c8ce', metalness:0.85, roughness:0.30 },
+  shieldDark:   { color:'#9aa0a8', metalness:0.80, roughness:0.35 },
+  gold:         { color:'#d9b24a', metalness:0.95, roughness:0.30 },
+  blackPlastic: { color:'#17171c', metalness:0.05, roughness:0.55 },
+  cavity:       { color:'#050507', metalness:0.0,  roughness:0.95, noShadow:true },
+  lid:          { color:'#8d9096', metalness:0.92, roughness:0.30 },
+  substrate:    { color:'#101015', metalness:0.20, roughness:0.55 },
+};
+
+function buildBox(g, p) {
+  addMesh(g, Box(p.w, p.h, p.d), { color: p.color, metalness:0.15, roughness:0.6 });
+}
+function buildChipLidded(g, p) {           // SoC, RP1 — substrate + metal lid (IHS)
+  const base = 0.6, lidH = Math.max(p.h, 1.7);
+  addMesh(g, Box(p.w, base, p.d), { ...MAT.substrate, pos:[0, -p.h/2 + base/2, 0] });
+  addMesh(g, Box(p.w*0.82, lidH, p.d*0.82), { ...MAT.lid, pos:[0, -p.h/2 + base + lidH/2, 0] });
+}
+function buildChipPlastic(g, p) {          // RAM, PMIC — black package
+  addMesh(g, Box(p.w, p.h, p.d), { color: p.color || '#16161a', metalness:0.05, roughness:0.5 });
+  addMesh(g, Box(p.w*0.86, 0.08, p.d*0.86), { color:'#27272e', metalness:0.1, roughness:0.4, noShadow:true, pos:[0, p.h/2-0.02, 0] });
+}
+function buildWireless(g, p) {             // EMI shield can
+  addMesh(g, Box(p.w, p.h, p.d), { color:'#babdc3', metalness:0.85, roughness:0.33 });
+  addMesh(g, Box(p.w*0.9, 0.15, p.d*0.9), { color:'#9aa0a8', metalness:0.9, roughness:0.28, noShadow:true, pos:[0, p.h/2, 0] });
+}
+function buildGpio(g, p) {                  // black base + 40 gold posts
+  const baseH = 3;
+  addMesh(g, Box(p.w, baseH, p.d), { ...MAT.blackPlastic, pos:[0, -p.h/2 + baseH/2, 0] });
+  const cols = (p.pins && p.pins.cols) || 20, rows = (p.pins && p.pins.rows) || 2;
+  const pitch = 2.54, pinW = 0.62, pinH = 6;
+  const x0 = -(cols-1)*pitch/2, z0 = -(rows-1)*pitch/2;
+  const pinGeo = Box(pinW, pinH, pinW);
+  for (let c = 0; c < cols; c++) for (let r = 0; r < rows; r++) {
+    addMesh(g, pinGeo, { ...MAT.gold, noShadow:true, pos:[x0 + c*pitch, -p.h/2 + baseH + pinH/2, z0 + r*pitch] });
+  }
+}
+function buildUsbStack(g, p, tongue) {      // metal shell + 2 ports opening toward +x, colored tongues
+  addMesh(g, Box(p.w, p.h, p.d), { ...MAT.shield });
+  const fx = p.w/2, portH = p.h*0.36, portW = p.d*0.7, gap = p.h*0.12;
+  for (const sy of [1, -1]) {
+    const yc = sy*(portH/2 + gap/2);
+    addMesh(g, Box(2.6, portH, portW), { ...MAT.cavity, pos:[fx-1.1, yc, 0] });
+    addMesh(g, Box(1.8, portH*0.34, portW*0.8), { color:tongue, metalness:0.0, roughness:0.5, noShadow:true, pos:[fx-1.0, yc, 0] });
+  }
+}
+function buildRj45(g, p) {                  // metal jack + opening + green/amber LEDs, opening toward +x
+  addMesh(g, Box(p.w, p.h, p.d), { ...MAT.shield });
+  addMesh(g, Box(3.2, p.h*0.6, p.d*0.7), { ...MAT.cavity, pos:[p.w/2-1.5, -p.h*0.05, 0] });
+  addMesh(g, Box(0.8, 1.3, 2.0), { color:'#0c3a1e', emissive:'#2ee06a', emissiveIntensity:1.1, noShadow:true, pos:[p.w/2-1.1, p.h*0.32, -p.d*0.22] });
+  addMesh(g, Box(0.8, 1.3, 2.0), { color:'#3a2a08', emissive:'#e0a020', emissiveIntensity:0.85, noShadow:true, pos:[p.w/2-1.1, p.h*0.32, p.d*0.22] });
+}
+function buildMicroHdmi(g, p) {             // small metal shell + slot opening toward +z
+  addMesh(g, Box(p.w, p.h, p.d), { ...MAT.shieldDark });
+  addMesh(g, Box(p.w*0.72, p.h*0.42, 1.6), { ...MAT.cavity, pos:[0, 0, p.d/2-0.7] });
+}
+function buildUsbC(g, p) {                  // oval mouth + center tongue, opening toward +z
+  addMesh(g, Box(p.w, p.h, p.d), { ...MAT.shield });
+  addMesh(g, Box(p.w*0.64, p.h*0.4, 1.6), { color:'#0a0a0c', metalness:0.2, roughness:0.8, noShadow:true, pos:[0, 0, p.d/2-0.7] });
+  addMesh(g, Box(p.w*0.42, p.h*0.12, 1.1), { color:'#3a3a3a', metalness:0.3, roughness:0.6, noShadow:true, pos:[0, 0, p.d/2-0.55] });
+}
+function buildFlex(g, p) {                  // FFC connector: base + actuator flap
+  const isPcie = p.id === 'pcie-fpc-connector';
+  addMesh(g, Box(p.w, p.h*0.66, p.d), { color:'#141418', metalness:0.1, roughness:0.6, pos:[0, -p.h*0.17, 0] });
+  addMesh(g, Box(p.w*1.15, p.h*0.4, p.d*0.96), { color: isPcie ? '#202024' : '#4a3c22', metalness:0.1, roughness:0.6, pos:[0, p.h*0.3, 0] });
+}
+function buildJst(g, p) {                   // tiny cream connector + pin holes
+  addMesh(g, Box(p.w, p.h, p.d), { color: p.color || '#ece6d2', metalness:0.0, roughness:0.6 });
+  const n = p.id.indexOf('uart') >= 0 ? 3 : (p.id.indexOf('fan') >= 0 ? 4 : 2);
+  const sp = Math.min(0.9, (p.w*0.8) / Math.max(n, 1));
+  for (let i = 0; i < n; i++) addMesh(g, Box(0.45, 0.4, 0.5), { color:'#1a1a1a', noShadow:true, pos:[(i-(n-1)/2)*sp, p.h/2-0.12, 0] });
+}
+function buildButton(g, p) {                // tact switch: base + round actuator
+  addMesh(g, Box(p.w, p.h*0.55, p.d), { color:'#161616', metalness:0.15, roughness:0.6, pos:[0, -p.h*0.225, 0] });
+  const r = Math.min(p.w, p.d)*0.3;
+  addMesh(g, new THREE.CylinderGeometry(r, r, p.h*0.55, 16), { color:'#0b0b0b', metalness:0.25, roughness:0.5, pos:[0, p.h*0.22, 0] });
+}
+function buildSdSlot(g, p) {                // underside metal tray + card slot
+  addMesh(g, Box(p.w, p.h, p.d), { color:'#9a9a9a', metalness:0.7, roughness:0.4 });
+  addMesh(g, Box(p.w*0.7, p.h*0.4, 0.9), { ...MAT.cavity, pos:[0, 0, p.d/2-0.5] });
+}
+function buildLeds(g, p) {                  // green (STAT) + red (PWR)
+  addMesh(g, Box(1.5, p.h, 1.0), { color:'#0c3a1e', emissive:'#2ee06a', emissiveIntensity:1.3, noShadow:true, pos:[-1.1, 0, 0] });
+  addMesh(g, Box(1.5, p.h, 1.0), { color:'#3a0c0c', emissive:'#ff3b30', emissiveIntensity:0.12, noShadow:true, pos:[1.1, 0, 0] });
+}
+
+function modelFor(p) {
+  switch (p.id) {
+    case 'gpio-40-pin-header': return 'gpio';
+    case 'usb3-port-stack': return 'usb3';
+    case 'usb2-port-stack': return 'usb2';
+    case 'gigabit-ethernet-rj45': return 'rj45';
+    case 'micro-hdmi-0': case 'micro-hdmi-1': return 'microhdmi';
+    case 'usb-c-power-input': return 'usbc';
+    case 'bcm2712-soc': case 'rp1-io-controller': return 'chiplid';
+    case 'lpddr4x-ram': case 'pmic-da9091': return 'chip';
+    case 'wireless-wifi-bt': return 'wireless';
+    case 'mipi-cam-disp-0': case 'mipi-cam-disp-1': case 'pcie-fpc-connector': return 'flex';
+    case 'uart-debug-header': case 'rtc-battery-connector': case 'fan-cooler-connector': return 'jst';
+    case 'power-button': return 'button';
+    case 'microsd-card-slot': return 'sdslot';
+    case 'status-leds': return 'leds';
+    default: return 'box';
+  }
+}
+const BUILDERS = {
+  box: buildBox, gpio: buildGpio,
+  usb3: (g, p) => buildUsbStack(g, p, '#2a6cc9'),
+  usb2: (g, p) => buildUsbStack(g, p, '#141414'),
+  rj45: buildRj45, microhdmi: buildMicroHdmi, usbc: buildUsbC,
+  chiplid: buildChipLidded, chip: buildChipPlastic, wireless: buildWireless,
+  flex: buildFlex, jst: buildJst, button: buildButton, sdslot: buildSdSlot, leds: buildLeds,
+};
+
+// material + edge helpers --------------------------------------------------
+const allMeshes = [];
+const HL_SEL = new THREE.Color(0x2563eb);
+const HL_HOV = new THREE.Color(0x16314f);
+function makeMeshPair(geo, opts) {
+  opts = opts || {};
+  const hasEm = !!opts.emissive;
+  const matRealistic = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(opts.color || '#888888'),
+    roughness: opts.roughness != null ? opts.roughness : 0.6,
+    metalness: opts.metalness != null ? opts.metalness : 0.1,
+    emissive: new THREE.Color(opts.emissive || 0x000000),
+    emissiveIntensity: hasEm ? (opts.emissiveIntensity != null ? opts.emissiveIntensity : 1) : 0,
+    envMapIntensity: opts.envMapIntensity != null ? opts.envMapIntensity : 1.0,
+    transparent: true,
+  });
+  const matBlueprint = new THREE.MeshBasicMaterial({
+    color: 0x0a2a43, transparent: true, opacity: 0.10, depthWrite: false,
+  });
+  const mesh = new THREE.Mesh(geo, matRealistic);
+  mesh.castShadow = !opts.noShadow;
+  mesh.receiveShadow = !opts.noShadow;
+  const edges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(geo, 30),
+    new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.85 })
+  );
+  edges.visible = false;
+  mesh.add(edges);
+  mesh.userData = { matRealistic, matBlueprint, edges,
+    baseEmissive: new THREE.Color(opts.emissive || 0x000000),
+    baseEmissiveIntensity: hasEm ? (opts.emissiveIntensity != null ? opts.emissiveIntensity : 1) : 0 };
+  return { mesh, edges, matRealistic, matBlueprint };
+}
+function addMesh(group, geo, opts) {
+  const pair = makeMeshPair(geo, opts);
+  if (opts && opts.pos) pair.mesh.position.set(opts.pos[0], opts.pos[1], opts.pos[2]);
+  group.add(pair.mesh);
+  allMeshes.push(pair.mesh);
+  return pair.mesh;
+}
+function collectMeshes(group) {
+  const out = [];
+  group.traverse(o => { if (o.isMesh) out.push(o); });
+  return out;
+}
+
+// appearance ---------------------------------------------------------------
+function refreshAppearance() {
+  for (const [id, p] of parts) {
+    const isSel = id === selectedId;
+    const isHov = id === hoveredId;
+    const dimmed = selectedId && !isSel && p.def.category !== 'board';
+    for (const mesh of p.meshes) {
+      const ud = mesh.userData;
+      if (!ud.matRealistic) continue;
+      if (!blueprintMode) {
+        mesh.material = ud.matRealistic;
+        if (isSel) { ud.matRealistic.emissive.copy(HL_SEL); ud.matRealistic.emissiveIntensity = 0.9; }
+        else if (isHov) { ud.matRealistic.emissive.copy(HL_HOV); ud.matRealistic.emissiveIntensity = 0.55; }
+        else { ud.matRealistic.emissive.copy(ud.baseEmissive); ud.matRealistic.emissiveIntensity = ud.baseEmissiveIntensity; }
+        ud.matRealistic.opacity = dimmed ? 0.18 : 1;
+        ud.edges.visible = false;
+      } else {
+        mesh.material = ud.matBlueprint;
+        ud.matBlueprint.opacity = dimmed ? 0.03 : (isSel ? 0.30 : 0.10);
+        ud.edges.visible = true;
+        ud.edges.material.color.set(isSel ? 0xffffff : (isHov ? 0xbae6fd : 0x38bdf8));
+        ud.edges.material.opacity = dimmed ? 0.12 : (isSel ? 1 : 0.85);
+      }
+    }
+  }
+}
+
+function applyMode() {
+  blueprintMode = !!blueprintMode;
+  scene.background = new THREE.Color(blueprintMode ? 0x05121e : 0x0b0f1a);
+  if (grid) grid.visible = blueprintMode;
+  if (ground) ground.visible = !blueprintMode;
+  if (keyLight) keyLight.castShadow = !blueprintMode;
+  if (silkMesh) silkMesh.visible = !blueprintMode;
+  scene.environment = blueprintMode ? null : envTex;
+  document.getElementById('btn-mode').textContent = blueprintMode ? 'Realistic mode' : 'Blueprint mode';
+  document.getElementById('btn-mode').classList.toggle('active', blueprintMode);
+  refreshAppearance();
+}
+
+// UI -----------------------------------------------------------------------
+const CAT_LABEL = { silicon:'Chips', port:'Ports', header:'Headers & pins', connector:'Connectors',
+  storage:'Storage', power:'Power', indicator:'Indicators', board:'Board', cooling:'Cooling', wireless:'Wireless' };
+const CAT_ORDER = ['silicon','port','connector','header','storage','power','wireless','cooling','indicator','board'];
+
+function buildList() {
+  const listEl = document.getElementById('list');
+  listEl.innerHTML = '';
+  const byCat = {};
+  for (const c of COMPONENTS) (byCat[c.category] ||= []).push(c);
+  for (const cat of CAT_ORDER) {
+    if (!byCat[cat]) continue;
+    const h = document.createElement('div'); h.className = 'cat'; h.textContent = CAT_LABEL[cat] || cat;
+    listEl.appendChild(h);
+    for (const c of byCat[cat]) {
+      const row = document.createElement('div'); row.className = 'row'; row.dataset.id = c.id;
+      row.innerHTML = '<span class="dot" style="background:'+c.color+'"></span>'
+        + '<span class="nm">'+c.name+'</span><span class="sl">'+c.shortLabel+'</span>';
+      row.addEventListener('click', () => selectPart(c.id));
+      row.addEventListener('mouseenter', () => { hoveredId = c.id; refreshAppearance(); });
+      row.addEventListener('mouseleave', () => { hoveredId = null; refreshAppearance(); });
+      listEl.appendChild(row);
+    }
+  }
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+
+function showDetail(id) {
+  const p = parts.get(id); if (!p) return;
+  const d = p.def;
+  const detail = document.getElementById('detail');
+  const list = document.getElementById('list');
+  detail.classList.add('show'); list.classList.add('hide');
+  document.getElementById('panel-sub').textContent = 'Showing one part — “Back” returns to the full list.';
+  let specs = (d.keySpecs||[]).map(s => '<li>'+escapeHtml(s)+'</li>').join('');
+  detail.innerHTML =
+    '<span class="badge">'+(CAT_LABEL[d.category]||d.category)+'</span>'
+    + '<h3>'+escapeHtml(d.name)+'</h3>'
+    + '<p class="desc">'+escapeHtml(d.whatItDoes||'')+'</p>'
+    + (specs ? '<ul class="specs">'+specs+'</ul>' : '')
+    + (d.funFact ? '<p class="fun">'+escapeHtml(d.funFact)+'</p>' : '')
+    + '<div class="back"><button class="btn" id="btn-back">← Back to all parts</button></div>';
+  document.getElementById('btn-back').addEventListener('click', clearSelection);
+}
+
+function selectPart(id) { selectedId = id; refreshAppearance(); showDetail(id); }
+function clearSelection() {
+  selectedId = null; refreshAppearance();
+  document.getElementById('detail').classList.remove('show');
+  document.getElementById('list').classList.remove('hide');
+  document.getElementById('panel-sub').textContent = 'Tap a part on the board, or pick one below.';
+}
+
+// ---- callout label overlay (annotated diagram, leader lines) ----
+function buildLabels() {
+  const cont = document.getElementById('labels');
+  leaderSvg = document.getElementById('leaders');
+  for (const { el, line } of calloutEls.values()) { el.remove(); line.remove(); }
+  calloutEls.clear();
+  for (const [id, p] of parts) {
+    if (p.def.category === 'board') continue;
+    const el = document.createElement('div'); el.className = 'callout'; el.textContent = p.def.shortLabel;
+    el.addEventListener('click', () => selectPart(id));
+    el.addEventListener('mouseenter', () => { hoveredId = id; refreshAppearance(); });
+    el.addEventListener('mouseleave', () => { hoveredId = null; refreshAppearance(); });
+    cont.appendChild(el);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('class', 'leader');
+    leaderSvg.appendChild(line);
+    calloutEls.set(id, { el, line });
+  }
+}
+function updateLabels() {
+  if (!leaderSvg) return;
+  const rect = renderer.domElement.getBoundingClientRect();
+  const panel = document.getElementById('panel');
+  const panelLeft = panel ? (panel.getBoundingClientRect().left - rect.left) : rect.width;
+  const items = [];
+  for (const [id, p] of parts) {
+    if (p.def.category === 'board') continue;
+    const v = p.center.clone().project(camera);
+    items.push({ id, sx: (v.x*0.5+0.5)*rect.width, sy: (-v.y*0.5+0.5)*rect.height, behind: v.z > 1 });
+  }
+  const cx = rect.width * 0.42;
+  const left = items.filter(o => o.sx < cx).sort((a,b) => a.sy - b.sy);
+  const right = items.filter(o => o.sx >= cx).sort((a,b) => a.sy - b.sy);
+  layoutColumn(left, 16, 'left', rect);
+  layoutColumn(right, Math.max(cx + 60, panelLeft - 128), 'right', rect);
+}
+function layoutColumn(arr, colX, side, rect) {
+  const gap = 25, top = 74, bot = rect.height - 28;
+  let y = top;
+  for (const o of arr) {
+    const c = calloutEls.get(o.id); if (!c) continue;
+    if (o.behind) { c.el.style.display = 'none'; c.line.style.display = 'none'; continue; }
+    c.el.style.display = ''; c.line.style.display = '';
+    const ly = Math.min(bot, Math.max(y, o.sy)); y = ly + gap;
+    c.el.style.left = colX + 'px'; c.el.style.top = ly + 'px';
+    const lw = c.el.offsetWidth || 80;
+    const ax = side === 'left' ? colX + lw : colX;
+    c.line.setAttribute('x1', ax); c.line.setAttribute('y1', ly);
+    c.line.setAttribute('x2', o.sx); c.line.setAttribute('y2', o.sy);
+  }
+}
+
+// interaction --------------------------------------------------------------
+function findPartId(obj) {
+  let o = obj;
+  while (o) { if (o.userData && o.userData.partId) return o.userData.partId; o = o.parent; }
+  return null;
+}
+function onPointerMove(e) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(selectables, true);
+  const id = hits.length ? findPartId(hits[0].object) : null;
+  if (id !== hoveredId) { hoveredId = id; refreshAppearance(); }
+  renderer.domElement.style.cursor = id ? 'pointer' : 'grab';
+}
+let downXY = null;
+function onPointerDown(e){ downXY = [e.clientX, e.clientY]; }
+function onPointerUp(e) {
+  if (!downXY) return;
+  const moved = Math.hypot(e.clientX - downXY[0], e.clientY - downXY[1]);
+  downXY = null;
+  if (moved > 5) return; // was a drag, not a click
+  if (hoveredId) selectPart(hoveredId);
+  else clearSelection();
+}
+
+function updateTooltip() {
+  if (!hoveredId) { tooltipEl.style.opacity = '0'; return; }
+  const p = parts.get(hoveredId); if (!p) { tooltipEl.style.opacity = '0'; return; }
+  const v = p.center.clone().project(camera);
+  if (v.z > 1) { tooltipEl.style.opacity = '0'; return; }
+  const rect = renderer.domElement.getBoundingClientRect();
+  const x = (v.x * 0.5 + 0.5) * rect.width;
+  const y = (-v.y * 0.5 + 0.5) * rect.height;
+  tooltipEl.style.left = x + 'px';
+  tooltipEl.style.top = y + 'px';
+  tooltipEl.textContent = p.def.name;
+  tooltipEl.style.opacity = '1';
+}
+
+// setup --------------------------------------------------------------------
+function init() {
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0b0f1a);
+
+  const w = sceneEl.clientWidth || window.innerWidth || 1280;
+  const h = sceneEl.clientHeight || window.innerHeight || 800;
+  camera = new THREE.PerspectiveCamera(42, w/h, 0.1, 2000);
+  camera.position.set(30, 76, 110);
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(w, h);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  sceneEl.appendChild(renderer.domElement);
+
+  // environment map for realistic metal reflections (generated, no external file)
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environment = envTex;
+
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true; controls.dampingFactor = 0.08;
+  controls.minDistance = 35; controls.maxDistance = 420;
+  controls.target.set(7, 2, 2);
+  controls.saveState();
+
+  // lights
+  scene.add(new THREE.AmbientLight(0xffffff, 0.30));
+  keyLight = new THREE.DirectionalLight(0xffffff, 2.1);
+  keyLight.position.set(55, 110, 70);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(2048, 2048);
+  keyLight.shadow.bias = -0.0004;
+  keyLight.shadow.normalBias = 0.6;
+  const sc = keyLight.shadow.camera;
+  sc.near = 10; sc.far = 340; sc.left = -75; sc.right = 75; sc.top = 75; sc.bottom = -75;
+  scene.add(keyLight);
+  const fill = new THREE.DirectionalLight(0x9ec5ff, 0.45); fill.position.set(-80, 50, -40); scene.add(fill);
+  const rim = new THREE.DirectionalLight(0xffffff, 0.5); rim.position.set(0, 30, -120); scene.add(rim);
+
+  // invisible shadow-catcher floor — keeps the dark "floating board" look, shows only the soft shadow
+  const groundGeo = new THREE.PlaneGeometry(900, 900);
+  groundGeo.rotateX(-Math.PI/2);
+  ground = new THREE.Mesh(groundGeo, new THREE.ShadowMaterial({ opacity: 0.38, transparent: true }));
+  ground.position.y = -14; ground.receiveShadow = true; scene.add(ground);
+
+  grid = new THREE.GridHelper(400, 40, 0x1e5b86, 0x123047);
+  grid.position.y = -15.9; grid.visible = false; scene.add(grid);
+
+  raycaster = new THREE.Raycaster();
+  pointer = new THREE.Vector2();
+
+  buildScene();
+  buildList();
+  buildLabels();
+  refreshAppearance();
+
+  renderer.domElement.addEventListener('pointermove', onPointerMove);
+  renderer.domElement.addEventListener('pointerdown', onPointerDown);
+  renderer.domElement.addEventListener('pointerup', onPointerUp);
+  window.addEventListener('resize', onResize);
+  if (window.ResizeObserver) { new ResizeObserver(() => onResize()).observe(sceneEl); }
+
+  document.getElementById('btn-mode').addEventListener('click', () => { blueprintMode = !blueprintMode; applyMode(); });
+  document.getElementById('btn-rotate').addEventListener('click', (ev) => {
+    controls.autoRotate = !controls.autoRotate; controls.autoRotateSpeed = 1.4;
+    ev.currentTarget.classList.toggle('active', controls.autoRotate);
+  });
+  document.getElementById('btn-reset').addEventListener('click', () => { controls.reset(); });
+  document.getElementById('btn-labels').addEventListener('click', (ev) => {
+    labelsOn = !labelsOn;
+    document.getElementById('labels').style.display = labelsOn ? 'block' : 'none';
+    ev.currentTarget.classList.toggle('active', labelsOn);
+    if (labelsOn) updateLabels();
+  });
+
+  statusEl.classList.add('hide');
+  animate();
+
+  // small debug handle (harmless) — lets tools force a size and read back the render
+  window.__rpi = {
+    THREE,
+    get renderer(){ return renderer; },
+    get scene(){ return scene; },
+    get camera(){ return camera; },
+    partCount(){ return parts.size; },
+    forceSize(w, h){ renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix(); renderer.render(scene, camera); },
+    stop(){ cancelAnimationFrame(_raf); },
+    start(){ animate(); },
+  };
+}
+
+function buildScene() {
+  parts.clear(); selectables.length = 0; allMeshes.length = 0;
+  for (const c of COMPONENTS) {
+    if (c.isBoard) buildBoard(c); else buildComponent(c);
+  }
+}
+
+function onResize() {
+  const w = sceneEl.clientWidth || window.innerWidth || 1280;
+  const h = sceneEl.clientHeight || window.innerHeight || 800;
+  camera.aspect = w/h; camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+}
+
+let _raf = 0;
+function animate() {
+  _raf = requestAnimationFrame(animate);
+  controls.update();
+  updateTooltip();
+  if (labelsOn) updateLabels();
+  renderer.render(scene, camera);
+}
+
+// rebuild the scene from a new COMPONENTS array (used when data is swapped in)
+window.__setComponents = function(arr) { COMPONENTS = arr; buildScene(); buildList(); buildLabels(); clearSelection(); refreshAppearance(); };
+
+try {
+  if (!window.WebGLRenderingContext) throw new Error('WebGL not supported in this browser.');
+  init();
+} catch (err) {
+  console.error(err);
+  showError('Could not start the 3D view.<br>' + (err && err.message ? err.message : err)
+    + '<br><br>If you are offline, this page needs internet on first load to fetch Three.js from the CDN.');
+}
+</script>
+</body>
+</html>

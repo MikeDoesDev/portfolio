@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#08090c" />
+  <title>WIT — Whatever It Takes · The Life Game</title>
+  <meta name="description" content="WIT turns self-improvement into a game. Four Wins. COD-style ranks. Whatever It Takes." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- grain + glow overlays -->
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- ========================== NAV ========================== -->
+  <header class="nav" id="nav">
+    <a class="nav__brand" href="#top" aria-label="WIT home">
+      <span class="nav__mark">WIT</span>
+      <span class="nav__sep">·</span>
+      <span class="nav__sub">Whatever It Takes</span>
+    </a>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="#command">Command</a>
+      <a href="#wins">The Four Wins</a>
+      <a href="#system">The System</a>
+      <a href="#rank">Rank</a>
+      <a href="#proof">Proof</a>
+      <a href="#record">Record</a>
+    </nav>
+    <a href="#join" class="btn btn--ghost nav__cta">Join the waitlist <span aria-hidden="true">→</span></a>
+  </header>
+
+  <!-- ========================== HERO ========================== -->
+  <section class="hero" id="top">
+    <canvas class="hero__canvas" id="constellation" aria-hidden="true"></canvas>
+    <div class="hero__veil" aria-hidden="true"></div>
+
+    <div class="hero__inner">
+      <p class="hero__eyebrow reveal">A life game · Four Wins · Coming to iOS &amp; Android</p>
+      <h1 class="hero__title">
+        <span class="reveal" style="--d:0">WHATEVER</span>
+        <span class="reveal" style="--d:1">IT</span>
+        <span class="reveal hero__accent" style="--d:2">TAKES</span>
+      </h1>
+      <p class="hero__mechanic reveal" style="--d:3">
+        12 daily habits. XP every check. Climb from <b>Recruit</b> to <b>Legend</b>.
+      </p>
+      <p class="hero__lede reveal" style="--d:4">
+        Most habit apps feel like a chore. WIT feels like progress.
+        Train the body, sharpen the mind, feed the spirit, and rest on purpose —
+        and watch it level up like a game worth playing.
+      </p>
+      <div class="hero__cta reveal" style="--d:5">
+        <a href="#join" class="btn btn--solid">Get early access <span aria-hidden="true">→</span></a>
+        <a href="#system" class="btn btn--ghost">Play the live demo</a>
+      </div>
+      <div class="hero__proofline reveal" style="--d:6">
+        <span class="store-pill">App Store — coming</span>
+        <span class="store-pill">Google Play — coming</span>
+        <span class="hero__note">Not a mockup — the tracker below actually runs.</span>
+      </div>
+
+      <div class="hero__question reveal" style="--d:7">
+        <span class="hero__qmark">“</span>If you knew you’d succeed, how far would you go?<span class="hero__qmark">”</span>
+      </div>
+    </div>
+
+    <a href="#wins" class="hero__scroll" aria-label="Scroll down">
+      <span class="hero__scroll-dot"></span>
+    </a>
+  </section>
+
+  <!-- ========================== MARQUEE ========================== -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track" id="marquee"></div>
+  </div>
+
+  <!-- ========================== 00 · COMMAND CENTER ========================== -->
+  <section class="section command" id="command">
+    <div class="section__head command__head">
+      <p class="kicker">00 — Command Center</p>
+      <h2 class="section__title command__hi">Whatever it takes, <span class="command__name">Michael</span></h2>
+      <p class="command__date" id="commandDate">—</p>
+      <p class="section__sub" id="commandStatus">— of — scheduled today · Recruit · 0 streak</p>
+    </div>
+
+    <div class="command__top">
+      <article class="witscore" id="witScore" data-band="steady">
+        <div class="witscore__ring-wrap">
+          <svg class="witscore__svg" viewBox="0 0 140 140" aria-hidden="true">
+            <circle class="witscore__track" cx="70" cy="70" r="60"/>
+            <circle class="witscore__fill"  cx="70" cy="70" r="60"/>
+          </svg>
+          <div class="witscore__center">
+            <span class="witscore__num" id="witScoreNum" data-v="0">0</span>
+            <span class="witscore__band" id="witScoreBand">—</span>
+          </div>
+        </div>
+        <div class="witscore__meta">
+          <span class="witscore__label">WIT Score</span>
+          <p class="witscore__brief" id="witScoreBrief">—</p>
+          <span class="witscore__basis">yesterday · 7-day form · streak health</span>
+        </div>
+      </article>
+      <figure class="qcard" id="quoteCard" data-voice="wit">
+        <span class="qcard__mark" aria-hidden="true">"</span>
+        <blockquote class="qcard__text" id="quoteText">—</blockquote>
+        <figcaption class="qcard__attr" id="quoteAttr">—</figcaption>
+      </figure>
+    </div>
+
+    <div class="gauges" id="gauges"><!-- 4 ring gauges injected --></div>
+    <div class="wincards" id="wincards"><!-- 4 per-Win status cards injected --></div>
+  </section>
+
+  <!-- ========================== THE FOUR WINS ========================== -->
+  <section class="section wins" id="wins">
+    <div class="section__head">
+      <p class="kicker">01 — The Framework</p>
+      <h2 class="section__title">The Four Wins</h2>
+      <p class="section__sub">
+        A whole person, not just a fitness tracker. Win all four and the day is yours.
+        Hover a Win to see what it asks of you.
+      </p>
+    </div>
+
+    <div class="wins__layout">
+      <div class="wins__grid" id="winsGrid"><!-- cards injected --></div>
+      <figure class="wins__radar">
+        <svg viewBox="0 0 320 320" id="radar" role="img" aria-label="Balance across the Four Wins">
+          <!-- radar injected -->
+        </svg>
+        <figcaption class="wins__radar-cap">Today’s balance</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ========================== THE DAILY SYSTEM (TRACKER) ========================== -->
+  <section class="section system" id="system">
+    <div class="section__head">
+      <p class="kicker">02 — The Daily Loop</p>
+      <h2 class="section__title">Run the day</h2>
+      <p class="section__sub">
+        This is live. Check a habit and it counts — XP, streaks, rank, all of it.
+        It saves to this browser, so your run is here when you come back.
+      </p>
+    </div>
+
+    <div class="system__head-extra">
+      <button id="editHabitsBtn" class="ghost-btn" type="button">✎ Edit habits</button>
+    </div>
+
+    <div class="system__board">
+      <!-- left: the day ring + headline numbers -->
+      <aside class="day">
+        <div class="day__ring-wrap" style="position:relative">
+          <svg class="day__ring" viewBox="0 0 200 200" id="dayRing" aria-hidden="true">
+            <circle class="day__ring-bg" cx="100" cy="100" r="86" />
+            <circle class="day__ring-fg" cx="100" cy="100" r="86" id="dayRingFg" />
+          </svg>
+          <div class="day__ring-center">
+            <span class="day__pct" id="dayPct">0%</span>
+            <span class="day__pct-label">of today</span>
+          </div>
+        </div>
+        <div class="day__date" id="dayDate">—</div>
+        <ul class="day__stats">
+          <li><span class="day__stat-num" id="statXpToday">0</span><span class="day__stat-lab">XP today</span></li>
+          <li><span class="day__stat-num" id="statStreak">0</span><span class="day__stat-lab">day streak</span></li>
+          <li><span class="day__stat-num" id="statDone">0/12</span><span class="day__stat-lab">habits</span></li>
+        </ul>
+        <div class="day__fourwins" id="dayFourWins" data-on="false">
+          <span class="day__fourwins-dot"></span> Four Wins day
+        </div>
+        <div class="catchup" id="catchup" hidden></div>
+        <div class="day__safe" id="daySafe" data-state="start"></div>
+      </aside>
+
+      <!-- right: the habit columns -->
+      <div class="tracker" id="tracker"><!-- columns injected --></div>
+    </div>
+
+    <div class="system__handoff">
+      <p class="system__handoff-line">You just played the system. Imagine doing this every day.</p>
+      <a href="#join" class="btn btn--solid">Get early access <span aria-hidden="true">→</span></a>
+    </div>
+  </section>
+
+  <!-- ========================== RANK & PROGRESS ========================== -->
+  <section class="section rank" id="rank">
+    <div class="section__head">
+      <p class="kicker">03 — Progression</p>
+      <h2 class="section__title">Earn your rank</h2>
+      <p class="section__sub">
+        Consistency is the game. Every win is XP. Climb from Recruit to Legend —
+        across each Win and overall, just like the blueprint.
+      </p>
+    </div>
+
+    <div class="rank__hero">
+      <div class="rank__current">
+        <span class="rank__current-label">Overall rank</span>
+        <span class="rank__current-name" id="rankName">Recruit</span>
+        <div class="rank__bar"><span class="rank__bar-fill" id="rankBar"></span></div>
+        <span class="rank__next" id="rankNext">— XP to next</span>
+      </div>
+      <div class="rank__xp">
+        <span class="rank__xp-num" id="rankXp">0</span>
+        <span class="rank__xp-label">total XP</span>
+      </div>
+    </div>
+
+    <ol class="ladder" id="ladder"><!-- rungs injected --></ol>
+
+    <div class="rank__cats" id="rankCats"><!-- per-category mini ranks injected --></div>
+  </section>
+
+  <!-- ========================== JOIN: THE WAITLIST ========================== -->
+  <section class="section join" id="join">
+    <div class="join__card">
+      <p class="kicker">Get in early</p>
+      <h2 class="section__title join__title">The app is coming.<br />Be first in.</h2>
+      <p class="section__sub join__sub">
+        WIT is being built for iOS &amp; Android. Join the waitlist to get first access
+        to the beta — and first shot at claiming your rank.
+      </p>
+      <form class="join__form" id="joinForm" action="https://formsubmit.co/michaelacoggins25@gmail.com" method="POST">
+        <input type="hidden" name="_subject" value="WIT waitlist signup" />
+        <input type="hidden" name="_captcha" value="false" />
+        <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off" />
+        <input class="join__input" type="email" name="email" required placeholder="your@email.com" aria-label="Email address" />
+        <button class="btn btn--solid join__btn" type="submit">Join the waitlist <span aria-hidden="true">→</span></button>
+      </form>
+      <p class="join__fine">No spam. One email when the beta opens.</p>
+    </div>
+  </section>
+
+  <!-- ========================== PROOF: GRID + BADGES ========================== -->
+  <section class="section proof" id="proof">
+    <div class="section__head">
+      <p class="kicker">04 — Proof of Work</p>
+      <h2 class="section__title">Show the streak</h2>
+      <p class="section__sub">Twelve weeks of evidence. Green is a day you showed up.</p>
+    </div>
+
+    <div class="grid-card">
+      <div class="grid-card__head">
+        <div>
+          <span class="grid-card__big" id="gridActive">0</span>
+          <span class="grid-card__lab">active days</span>
+        </div>
+        <div>
+          <span class="grid-card__big" id="gridBest">0</span>
+          <span class="grid-card__lab">longest streak</span>
+        </div>
+        <div>
+          <span class="grid-card__big" id="gridTotal">0</span>
+          <span class="grid-card__lab">total wins</span>
+        </div>
+      </div>
+      <div class="heatmap" id="heatmap" role="img" aria-label="Consistency heatmap, last 12 weeks"></div>
+      <div class="heatmap__legend">
+        <span>Less</span>
+        <span class="heatmap__legend-cells">
+          <i data-lvl="0"></i><i data-lvl="1"></i><i data-lvl="2"></i><i data-lvl="3"></i><i data-lvl="4"></i>
+        </span>
+        <span>More</span>
+      </div>
+    </div>
+
+    <div class="badges">
+      <h3 class="badges__title">Badges</h3>
+      <div class="badges__grid" id="badges"><!-- badges injected --></div>
+    </div>
+  </section>
+
+  <!-- ====================== 05 · THE RECORD: MATRIX + TREND ================= -->
+  <section class="section record" id="record">
+    <div class="section__head">
+      <p class="kicker">05 — The Record</p>
+      <h2 class="section__title">The goal graph</h2>
+      <p class="section__sub">
+        The old habit sheet, rebuilt. Every column is a habit, every row a day.
+        The line on the right is your daily score — the trend that tells the truth.
+      </p>
+    </div>
+
+    <article class="debrief" id="debrief" hidden>
+      <header class="debrief__head">
+        <span class="kicker">Weekly debrief</span>
+        <span class="debrief__range" id="debriefRange">—</span>
+        <button class="debrief__x" id="debriefDismiss" type="button" aria-label="Dismiss">&#x2715;</button>
+      </header>
+      <div class="debrief__grid">
+        <div class="debrief__stat"><b data-db="rate">—</b><span>week rate</span></div>
+        <div class="debrief__stat"><b data-db="fw">—</b><span>four-wins days</span></div>
+        <div class="debrief__stat"><b data-db="hits">—</b><span>habits hit</span></div>
+        <div class="debrief__stat"><b data-db="delta">—</b><span>vs prior week</span></div>
+      </div>
+      <p class="debrief__line" id="debriefLine">Your first debrief lands Monday.</p>
+    </article>
+
+    <div class="record__bar">
+      <div class="record__windows" id="recordWindows" role="tablist" aria-label="Time window">
+        <button class="seg" data-days="14" type="button" aria-selected="true">14 days</button>
+        <button class="seg" data-days="30" type="button" aria-selected="false">30 days</button>
+        <button class="seg" data-days="90" type="button" aria-selected="false">90 days</button>
+      </div>
+      <label class="record__avg"><input type="checkbox" id="recordAvg" checked /><span>7-day average</span></label>
+    </div>
+
+    <div class="record__layout">
+      <div class="matrix-card">
+        <div class="matrix-card__head">
+          <span class="matrix-card__title">Habit matrix</span>
+          <span class="matrix-card__legend">
+            <span class="mlg"><i class="mlg__done"></i> done</span>
+            <span class="mlg"><i class="mlg__miss"></i> missed</span>
+            <span class="mlg"><i class="mlg__rest"></i> rest</span>
+            <span class="mlg"><i class="mlg__shield"></i> shield</span>
+          </span>
+        </div>
+        <div class="matrix" id="matrix" role="table" aria-label="Habit completion matrix"></div>
+      </div>
+
+      <div class="trend-card">
+        <div class="trend-card__head">
+          <div><span class="trend-card__title">Daily score</span>
+            <span class="trend-card__sub" id="trendSub">last 14 days · goal 4/12</span></div>
+          <div class="trend-card__now">
+            <span class="trend-card__now-num" id="trendNow" data-v="0">0</span>
+            <span class="trend-card__now-lab">today<br><span class="trend-card__delta" id="trendDelta">—</span></span>
+          </div>
+        </div>
+        <svg class="trend" id="trend" viewBox="0 0 720 300"
+             role="img" aria-label="Trend of daily habit score"></svg>
+        <div class="trend__xaxis" id="trendAxis"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================== MANIFESTO ========================== -->
+  <section class="manifesto">
+    <div class="manifesto__inner">
+      <p class="manifesto__kicker reveal">The North Star</p>
+      <blockquote class="manifesto__quote">
+        <span class="reveal" style="--d:0">I want to succeed.</span>
+        <span class="reveal" style="--d:1">Not because I was in the right place at the right time —</span>
+        <span class="reveal" style="--d:2">but because I worked hard to get there.</span>
+      </blockquote>
+      <p class="manifesto__line reveal" style="--d:3">
+        Whatever it takes to succeed. Whatever it takes to follow Christ.
+        Whatever it takes to become who you said you’d be.
+      </p>
+      <p class="manifesto__sign reveal" style="--d:4">— Michael · <span class="manifesto__wit">WIT</span></p>
+    </div>
+  </section>
+
+  <!-- ========================== FOOTER ========================== -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <span class="footer__mark">WIT</span>
+        <p class="footer__tag">Built to be lived, not just logged.</p>
+      </div>
+      <div class="footer__actions">
+        <button class="btn btn--ghost btn--danger" id="resetBtn" type="button">&#x21BA; Reset demo data</button>
+        <button id="exportBtn" class="btn btn--ghost" type="button">&#x2913; Export backup</button>
+        <button id="importBtn" class="btn btn--ghost" type="button">&#x2912; Import backup</button>
+        <input id="importInput" type="file" accept="application/json,.json" hidden>
+        <button id="soundBtn" class="btn btn--ghost" type="button" aria-pressed="true">&#x1F50A; Sound</button>
+        <a class="btn btn--ghost" href="#top">Back to top &#x2191;</a>
+      </div>
+    </div>
+    <p class="footer__fine">
+      WIT is in development. This page is a live preview of the core experience —
+      check habits, earn XP, watch the system run. Your data saves to this browser.
+      <span id="testLine" class="footer__test"></span>
+      <span id="savedLine" class="footer__test"></span>
+    </p>
+  </footer>
+
+  <!-- ========================== RESET CONFIRM MODAL ========================== -->
+  <div id="resetConfirm" class="confirm" role="dialog" aria-modal="true" aria-labelledby="resetConfirmTitle" hidden>
+    <div class="confirm__backdrop"></div>
+    <div class="confirm__box">
+      <div class="confirm__medal" aria-hidden="true">↺</div>
+      <h2 class="confirm__title" id="resetConfirmTitle">Reset demo data?</h2>
+      <p class="confirm__body">This will replace your current completion history with a fresh 12-week demo run. Your habits and goal are preserved.</p>
+      <p class="confirm__hint">Your actual streak will be cleared. This cannot be undone.</p>
+      <div class="confirm__actions">
+        <button id="resetCancel" class="btn btn--ghost" type="button" data-confirm-cancel>Keep my run</button>
+        <button id="resetConfirmGo" class="btn btn--danger-solid" type="button">Yes, reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- toast host -->
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <!-- ========================== HABIT EDITOR SHEET ========================== -->
+  <div id="habitEditor" class="heditor" role="dialog" aria-modal="true" aria-labelledby="heditorTitle" hidden>
+    <div class="heditor__scrim"></div>
+    <div class="heditor__panel">
+      <div class="heditor__head">
+        <span class="heditor__title" id="heditorTitle">Edit Habits</span>
+        <span class="heditor__sub">Drag or use ▲▼ to reorder within a Win</span>
+        <button class="heditor__x" type="button" aria-label="Close editor">×</button>
+      </div>
+      <div class="heditor__error" role="alert"></div>
+      <div class="heditor__body"><!-- rows injected by renderEditor() --></div>
+      <div class="heditor__foot">
+        <button class="heditor__reset ghost-btn" type="button">↺ Reset to defaults</button>
+        <div class="heditor__foot-actions">
+          <button class="heditor__cancel ghost-btn" type="button">Cancel</button>
+          <button class="heditor__save primary-btn" type="button">Save habits</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- value popover -->
+  <div class="valpop" id="valpop" role="dialog" aria-label="Log amount" hidden>
+    <div class="valpop__row">
+      <button class="valpop__step" type="button" data-vstep="-1" aria-label="Less">&#x2212;</button>
+      <input class="valpop__num" id="valpopNum" inputmode="decimal" aria-label="Amount">
+      <span class="valpop__unit" id="valpopUnit">—</span>
+      <button class="valpop__step" type="button" data-vstep="1" aria-label="More">+</button>
+    </div>
+    <div class="valpop__quick" id="valpopQuick"></div>
+    <p class="valpop__floor" id="valpopFloor">Showing up is the win.</p>
+  </div>
+
+  <!-- fx canvas for confetti -->
+  <canvas id="fxCanvas" aria-hidden="true"></canvas>
+
+  <!-- rank-up cinematic -->
+  <div class="cine" id="rankCinematic" role="dialog" aria-modal="true" aria-label="Rank up" hidden>
+    <div class="cine__scrim"></div>
+    <div class="cine__box">
+      <p class="cine__kicker">RANK UP</p>
+      <div class="cine__insignia" id="cineInsignia">&#x2605;</div>
+      <h2 class="cine__name" id="cineName">—</h2>
+      <p class="cine__xp"><span id="cineXp" data-v="0">0</span> XP</p>
+      <p class="cine__quote" id="cineQuote">—</p>
+      <button class="btn btn--solid cine__go" id="cineContinue" type="button">CONTINUE</button>
+    </div>
+  </div>
+
+  <script src="wit-core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
