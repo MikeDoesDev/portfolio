@@ -69,8 +69,8 @@ export const PROJECTS: Project[] = [
     blurb:
       "A habit tracker that plays like a game: XP, six ranks, streak shields, and a 12-week consistency heatmap across four life categories — validated with 53 passing self-tests.",
     tags: ["JavaScript", "Canvas", "Product design"],
-    status: "shipped",
-    timeframe: "2026",
+    status: "in-progress",
+    timeframe: "2026 — present",
     headliner: false,
   },
 ];

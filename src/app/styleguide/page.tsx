@@ -43,14 +43,11 @@ const COPY = {
   heroSecondary: "Résumé",
 
   deviceNote:
-    "You were right that a dark panel is good contrast. The issue was never darkness. It is that both demos are cool blue-blacks and every colour you picked is warm. Left is what they look like today. Right is the same panel on the warm device tone, with the lime pulled toward the sage family.",
-  deviceLeftTitle: "As they are now",
-  deviceLeftCaption: "Cool blue-black, neon lime. Reads as a hole cut in the paper.",
-  deviceRightTitle: "Retuned warm",
-  deviceRightCaption:
-    "Warm near-black, lime tamed toward sage. Reads as a screen you’re looking into.",
+    "Embedded demos keep their dark panel. The issue was never darkness, it was temperature: both demos are cool blue-blacks while every colour in this palette is warm. They move to the warm device tone, framed by a lip of tan so the dark reads as a screen rather than a hole in the paper.",
+  deviceCaption:
+    "Warm near-black, and WIT’s lime tamed toward the sage family. This is the agreed treatment.",
   deviceClosing:
-    "Both keep the dark. The question is only whether WIT’s neon lime stays as a deliberate jolt or gets pulled into the family. Neighbouring hues that don’t agree read as a mistake, while distant ones read as a choice.",
+    "Both demo files need retuning to match. The Pi 5 one is nearly free, since it already uses warm cream and gold internally and only its background is cool.",
 
   aboutNote: "About page only, never the home page. Placeholders until you send the real entries.",
   pullquote:
@@ -292,48 +289,30 @@ export default function StyleguidePage() {
             <p className={styles.note}>{COPY.deviceNote}</p>
           </div>
 
-          <div className={styles.deviceSplit}>
-            <div className={styles.deviceCol}>
-              <h3>{COPY.deviceLeftTitle}</h3>
-              <p className={styles.deviceCaption}>{COPY.deviceLeftCaption}</p>
-              <div className={styles.device}>
-                <div className={styles.deviceBarCool}>
-                  <span className={styles.dot} /><span className={styles.dot} /><span className={styles.dot} />
-                </div>
-                <div className={styles.deviceBodyCool}>
-                  <span className={`${styles.deviceHeadline} ${styles.coolHeadline}`}>
-                    Day 41 · <span className={styles.limeNeon}>Locked In</span>
-                  </span>
-                  <div className={`${styles.deviceMeter} ${styles.meterCool}`}>
-                    <div className={styles.meterFillNeon} />
-                  </div>
-                  <p className={styles.deviceSmall}>
-                    physical · mental · spiritual · rest<br />
-                    7-day average 68%
-                  </p>
-                </div>
-              </div>
+          <div className={styles.deviceCol}>
+            <div className={styles.row} style={{ marginBottom: "0.75rem" }}>
+              <h3 style={{ margin: 0 }}>WIT</h3>
+              <span className={`${styles.badge} ${styles.bProgress}`}>
+                <span className={styles.badgeDot} aria-hidden="true" />
+                In progress
+              </span>
             </div>
-
-            <div className={styles.deviceCol}>
-              <h3>{COPY.deviceRightTitle}</h3>
-              <p className={styles.deviceCaption}>{COPY.deviceRightCaption}</p>
-              <div className={styles.device}>
-                <div className={styles.deviceBarWarm}>
-                  <span className={styles.dot} /><span className={styles.dot} /><span className={styles.dot} />
+            <p className={styles.deviceCaption}>{COPY.deviceCaption}</p>
+            <div className={styles.device}>
+              <div className={styles.deviceBarWarm}>
+                <span className={styles.dot} /><span className={styles.dot} /><span className={styles.dot} />
+              </div>
+              <div className={styles.deviceBodyWarm}>
+                <span className={`${styles.deviceHeadline} ${styles.warmHeadline}`}>
+                  Day 41 · <span className={styles.limeTamed}>Locked In</span>
+                </span>
+                <div className={`${styles.deviceMeter} ${styles.meterWarm}`}>
+                  <div className={styles.meterFillTamed} />
                 </div>
-                <div className={styles.deviceBodyWarm}>
-                  <span className={`${styles.deviceHeadline} ${styles.warmHeadline}`}>
-                    Day 41 · <span className={styles.limeTamed}>Locked In</span>
-                  </span>
-                  <div className={`${styles.deviceMeter} ${styles.meterWarm}`}>
-                    <div className={styles.meterFillTamed} />
-                  </div>
-                  <p className={styles.deviceSmall}>
-                    physical · mental · spiritual · rest<br />
-                    7-day average 68%
-                  </p>
-                </div>
+                <p className={styles.deviceSmall}>
+                  physical · mental · spiritual · rest<br />
+                  7-day average 68%
+                </p>
               </div>
             </div>
           </div>
