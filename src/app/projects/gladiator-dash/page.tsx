@@ -8,7 +8,7 @@ import TimingDiagram from "./TimingDiagram";
 export const metadata: Metadata = {
   title: "Gladiator Dash RFID Timing",
   description:
-    "Architecting an RFID race-timing pod — industrial reader, tuned antennas, Raspberry Pi pipeline — to replace a $3K/year timing vendor at Texas A&M's Gladiator Dash mud run.",
+    "Architecting an RFID race-timing pod: industrial reader, tuned antennas, and a Raspberry Pi pipeline, so One Army can time its own charity mud run.",
 };
 
 const metrics = [
@@ -28,8 +28,10 @@ export default function GladiatorDashPage() {
           <h2 className="mono-label mb-4 text-copper">Overview</h2>
           <div className="space-y-4 text-muted">
             <p>
-              Every year, Texas A&amp;M&rsquo;s Gladiator Dash mud run pays a vendor roughly
-              $3,000 to time the race. I&rsquo;m architecting the replacement: a single arena
+              Gladiator Dash is One Army&rsquo;s charity mud run, and every year we pay a
+              vendor to time it. Owning the timing gives runners real splits instead of a
+              finish time, and accurate timing is what makes a race worth travelling for if
+              you actually compete. So I&rsquo;m architecting the replacement: a single arena
               pod built from one industrial RFID reader — I&rsquo;m evaluating the Impinj
               Speedway R420 against budget Chafon units — feeding two circular-polarized
               antennas that form read zones at the start and finish lines, about 25 feet
@@ -83,13 +85,11 @@ export default function GladiatorDashPage() {
               </p>
             </div>
             <div className="rounded-xl border border-line bg-surface p-6">
-              <h3 className="font-heading text-lg font-semibold">Build vs rent economics</h3>
+              <h3 className="font-heading text-lg font-semibold">What it costs to build</h3>
               <p className="mt-3 text-sm leading-relaxed text-muted">
-                The bill of materials targets $1,115–$1,315 all-in, against $3,000 per
-                year for the vendor — the pod pays for itself before the first starting
-                gun and saves every year after. The reader is the swing item, which is why
-                the Impinj-vs-Chafon evaluation matters: it&rsquo;s most of the budget and most
-                of the read-rate risk.
+                The bill of materials targets $1,115–$1,315 all-in, inside a $1,500 cap.
+                The reader is the swing item, which is why the Impinj-vs-Chafon evaluation
+                matters: it&rsquo;s most of the budget and most of the read-rate risk.
               </p>
             </div>
           </div>

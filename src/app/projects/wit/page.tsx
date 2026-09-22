@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import ProjectLayout from "@/components/project/ProjectLayout";
-import MediaFrame from "@/components/project/MediaFrame";
+import EmbedFrame from "@/components/project/EmbedFrame";
 import Reveal from "@/components/motion/Reveal";
 import { getProject } from "@/content/projects";
 
@@ -56,13 +56,12 @@ export default function WitPage() {
 
       <Reveal>
         <section className="space-y-8">
-          <MediaFrame caption="It's a living prototype — launch it and play a day.">
-            <div className="flex aspect-video items-center justify-center p-4">
-              <div className="flex h-full w-full items-center justify-center rounded-lg border border-dashed border-line">
-                <p className="mono-label">screenshots coming — the demo is the real thing</p>
-              </div>
-            </div>
-          </MediaFrame>
+          {/* This used to be an empty placeholder frame sitting directly above a
+              link to the working demo. The demo is the proof, so it runs here. */}
+          <EmbedFrame src="/demos/wit/index.html" title="WIT, the life game" aspect={16 / 10} />
+          <p className="text-center font-mono text-xs text-muted">
+            It&rsquo;s a living prototype. Play a day, or open it full screen below.
+          </p>
           <div className="flex justify-center">
             <a
               href="/demos/wit/index.html"

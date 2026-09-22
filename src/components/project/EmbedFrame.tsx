@@ -21,9 +21,12 @@ export default function EmbedFrame({ src, title, aspect = 16 / 10 }: EmbedFrameP
   const [loaded, setLoaded] = useState(false);
 
   return (
+    /* The demos are self-contained dark pages. On a cream ground a bare dark
+       rectangle reads as a hole in the paper, so it gets a lip of raised tan
+       around it and it reads as a screen instead. */
     <div
       ref={wrapRef}
-      className="relative overflow-hidden rounded-xl border border-line bg-surface"
+      className="relative overflow-hidden rounded-xl border-8 border-raised bg-[#1e1a14] shadow-[0_18px_40px_-22px_rgba(51,41,31,0.45)]"
       style={{ aspectRatio: aspect }}
     >
       {inView ? (
@@ -44,13 +47,13 @@ export default function EmbedFrame({ src, title, aspect = 16 / 10 }: EmbedFrameP
             Fullscreen
           </button>
           {!loaded && (
-            <p className="absolute inset-0 flex items-center justify-center font-mono text-sm text-muted">
+            <p className="absolute inset-0 flex items-center justify-center font-mono text-sm text-[#a79c8c]">
               Loading demo…
             </p>
           )}
         </>
       ) : (
-        <p className="absolute inset-0 flex items-center justify-center font-mono text-sm text-muted">
+        <p className="absolute inset-0 flex items-center justify-center font-mono text-sm text-[#a79c8c]">
           Demo loads when visible
         </p>
       )}

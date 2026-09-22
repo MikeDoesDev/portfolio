@@ -7,7 +7,7 @@ interface MediaFrameProps {
   className?: string;
 }
 
-/** Bordered dark frame that gives every visual a consistent presentation. */
+/** Bordered frame that gives every visual a consistent presentation. */
 export default function MediaFrame({ caption, children, className = "" }: MediaFrameProps) {
   return (
     <figure className={`overflow-hidden rounded-xl border border-line bg-surface ${className}`}>

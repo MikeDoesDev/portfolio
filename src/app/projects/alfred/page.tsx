@@ -11,17 +11,6 @@ export const metadata: Metadata = {
     "Case study: a personal AI command center — calendar, email, habits, Obsidian notes, and a streaming Claude chat unified in one dark dashboard.",
 };
 
-function CapturePlaceholder({ label }: { label: string }) {
-  return (
-    <div className="flex aspect-video items-center justify-center bg-ink p-4">
-      <div className="flex h-full w-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-line">
-        <span className="font-mono text-xs tracking-[0.14em] text-copper">[ {label} ]</span>
-        <span className="font-mono text-xs text-muted">capture pending — keys rotating</span>
-      </div>
-    </div>
-  );
-}
-
 export default function AlfredPage() {
   return (
     <ProjectLayout
@@ -31,7 +20,7 @@ export default function AlfredPage() {
       {/* Overview */}
       <Reveal>
         <section>
-          <p className="mono-label mb-4 text-copper">01 — Overview</p>
+          <p className="mono-label mb-4 text-copper">01 · Overview</p>
           <h2 className="font-heading text-3xl font-bold">One screen that runs the day</h2>
           <div className="mt-6 max-w-2xl space-y-4 text-muted">
             <p>
@@ -56,7 +45,7 @@ export default function AlfredPage() {
       {/* Architecture diagram */}
       <Reveal>
         <section>
-          <p className="mono-label mb-4 text-copper">02 — Architecture</p>
+          <p className="mono-label mb-4 text-copper">02 · Architecture</p>
           <MediaFrame caption="System architecture — browser UI, Next.js API routes, and the three external services behind them.">
             <ArchitectureDiagram />
           </MediaFrame>
@@ -66,7 +55,7 @@ export default function AlfredPage() {
       {/* Highlights */}
       <Reveal>
         <section>
-          <p className="mono-label mb-4 text-copper">03 — Highlights</p>
+          <p className="mono-label mb-4 text-copper">03 · Highlights</p>
           <h2 className="font-heading text-3xl font-bold">What makes it work</h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-line bg-surface p-6">
@@ -98,25 +87,10 @@ export default function AlfredPage() {
         </section>
       </Reveal>
 
-      {/* Interface captures */}
-      <Reveal>
-        <section>
-          <p className="mono-label mb-4 text-copper">04 — Interface</p>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <MediaFrame caption="Interface capture coming — dashboard currently runs on localhost">
-              <CapturePlaceholder label="DASHBOARD — SCHEDULE TAB" />
-            </MediaFrame>
-            <MediaFrame caption="Interface capture coming — dashboard currently runs on localhost">
-              <CapturePlaceholder label="ALFRED CHAT PANEL" />
-            </MediaFrame>
-          </div>
-        </section>
-      </Reveal>
-
       {/* Metrics */}
       <Reveal>
         <section>
-          <p className="mono-label mb-4 text-copper">05 — By the numbers</p>
+          <p className="mono-label mb-4 text-copper">04 · By the numbers</p>
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-line bg-surface p-8">
               <p className="font-heading text-5xl font-bold text-copper-bright">53/53</p>
@@ -141,7 +115,7 @@ export default function AlfredPage() {
       {/* What's next */}
       <Reveal>
         <section>
-          <p className="mono-label mb-4 text-copper">06 — What&apos;s next</p>
+          <p className="mono-label mb-4 text-copper">05 · What&apos;s next</p>
           <div className="max-w-2xl space-y-4 text-muted">
             <p>
               ALFRED is about 90% built and runs on localhost today. Next up: moving habit

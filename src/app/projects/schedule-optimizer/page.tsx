@@ -21,7 +21,7 @@ export default function ScheduleOptimizerPage() {
       {/* Overview */}
       <Reveal>
         <section>
-          <p className="mono-label mb-4 text-copper">01 — Overview</p>
+          <p className="mono-label mb-4 text-copper">01 · Overview</p>
           <h2 className="font-heading text-3xl font-bold">
             Registration is a gamble. This computes the answer.
           </h2>
@@ -49,7 +49,7 @@ export default function ScheduleOptimizerPage() {
       {/* Pipeline diagram */}
       <Reveal>
         <section>
-          <p className="mono-label mb-4 text-copper">02 — Pipeline</p>
+          <p className="mono-label mb-4 text-copper">02 · Pipeline</p>
           <MediaFrame caption="Data pipeline — two section sources merged by CRN, enriched from two rating sources, scored by a pure engine, ranked in the UI, CRNs returned to registration.">
             <PipelineDiagram />
           </MediaFrame>
@@ -59,7 +59,7 @@ export default function ScheduleOptimizerPage() {
       {/* Highlights */}
       <Reveal>
         <section>
-          <p className="mono-label mb-4 text-copper">03 — Highlights</p>
+          <p className="mono-label mb-4 text-copper">03 · Highlights</p>
           <h2 className="font-heading text-3xl font-bold">The parts I&apos;m proud of</h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-line bg-surface p-6">
@@ -96,7 +96,7 @@ export default function ScheduleOptimizerPage() {
       {/* Metrics */}
       <Reveal>
         <section>
-          <p className="mono-label mb-4 text-copper">04 — By the numbers</p>
+          <p className="mono-label mb-4 text-copper">04 · By the numbers</p>
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-line bg-surface p-8">
               <p className="font-heading text-5xl font-bold text-copper-bright">21.7k</p>
@@ -140,7 +140,7 @@ export default function ScheduleOptimizerPage() {
       {/* What's next */}
       <Reveal>
         <section>
-          <p className="mono-label mb-4 text-copper">05 — What&apos;s next</p>
+          <p className="mono-label mb-4 text-copper">05 · What&apos;s next</p>
           <div className="max-w-2xl space-y-4 text-muted">
             <p>
               The tool already runs my real registrations end-to-end from a Flask server on

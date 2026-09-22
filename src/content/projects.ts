@@ -1,4 +1,4 @@
-export type ProjectStatus = "shipped" | "in-progress" | "planning";
+export type ProjectStatus = "shipped" | "in-progress" | "planning" | "considering";
 
 export interface Project {
   slug: string;
@@ -45,11 +45,11 @@ export const PROJECTS: Project[] = [
     title: "Gladiator Dash RFID Timing",
     tagline: "Race timing, built instead of rented",
     blurb:
-      "An embedded RFID timing system — Raspberry Pi, industrial reader, tuned antennas — architected to time hundreds of mud-run racers and replace a $3K/year vendor.",
+      "An embedded RFID timing system, built around a Raspberry Pi, an industrial reader and tuned antennas, so One Army can time its own 2,380-runner charity mud run.",
     tags: ["Raspberry Pi", "RFID / LLRP", "Embedded", "SQLite", "FastAPI"],
-    status: "planning",
-    timeframe: "2025 — present",
-    headliner: true,
+    status: "considering",
+    timeframe: "2026",
+    headliner: false,
   },
   {
     slug: "raspberry-pi-3d",
@@ -90,4 +90,7 @@ export const STATUS_LABEL: Record<ProjectStatus, string> = {
   shipped: "Shipped",
   "in-progress": "In progress",
   planning: "Architecture phase",
+  /** Designed and thought through, not started. An honest home for work that
+   *  is real but parked, so it can be shown without implying it is in flight. */
+  considering: "On the shelf",
 };

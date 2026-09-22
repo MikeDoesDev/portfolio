@@ -4,7 +4,7 @@ const MONO = "var(--font-mono)";
 const INK = "var(--color-ink)";
 const SURFACE = "var(--color-surface)";
 const RAISED = "var(--color-raised)";
-const LINE = "rgba(255,255,255,0.14)";
+const LINE = "var(--color-line)";
 const FG = "var(--color-fg)";
 const MUTED = "var(--color-muted)";
 const COPPER = "var(--color-copper)";
@@ -28,10 +28,10 @@ export default function PipelineDiagram() {
       {/* backdrop + blueprint grid */}
       <rect width="840" height="560" fill={INK} />
       {[112, 224, 336, 448].map((y) => (
-        <line key={y} x1="0" y1={y} x2="840" y2={y} stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+        <line key={y} x1="0" y1={y} x2="840" y2={y} stroke="rgba(51,41,31,0.05)" strokeWidth="1" />
       ))}
       {[168, 336, 504, 672].map((x) => (
-        <line key={x} x1={x} y1="0" x2={x} y2="560" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+        <line key={x} x1={x} y1="0" x2={x} y2="560" stroke="rgba(51,41,31,0.05)" strokeWidth="1" />
       ))}
 
       {/* ── Sources ── */}

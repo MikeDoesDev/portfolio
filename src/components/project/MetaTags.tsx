@@ -8,7 +8,7 @@ export default function MetaTags({ project }: { project: Project }) {
         {project.tags.map((tag) => (
           <li
             key={tag}
-            className="rounded-full border border-maroon/60 px-3 py-1 font-mono text-xs uppercase tracking-wider text-muted"
+            className="rounded-full border border-line bg-raised/60 px-3 py-1 font-mono text-xs uppercase tracking-wider text-muted"
           >
             {tag}
           </li>
