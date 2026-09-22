@@ -232,7 +232,7 @@ export default function OrbitCluster({
           href={link.href}
           aria-label={link.label}
           {...(link.external ? { target: "_blank", rel: "noreferrer" } : {})}
-          className="orbit-node absolute left-1/2 top-1/2 -ml-[23px] -mt-[23px] grid size-[46px] place-items-center rounded-full bg-surface focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-copper"
+          className="orbit-node absolute left-1/2 top-1/2 -ml-[23px] -mt-[23px] grid size-[46px] place-items-center rounded-full border border-line bg-surface focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-copper"
           style={
             {
               ["--a"]: String(-90 + i * step),

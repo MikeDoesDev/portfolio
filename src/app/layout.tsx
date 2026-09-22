@@ -17,11 +17,11 @@ export const metadata: Metadata = {
     template: `%s — ${SITE_NAME}`,
   },
   description:
-    "Portfolio of Andrew Michael Coggins: Computer & Electrical Engineering at Texas A&M, building at the intersection of embedded hardware and agentic AI.",
+    "Andrew “Michael” Coggins. Computer and Electrical Engineering at Texas A&M, building things that make life easier and faster.",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0b0e",
+  themeColor: "#f7f2eb",
 };
 
 export default function RootLayout({

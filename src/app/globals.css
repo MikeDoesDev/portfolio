@@ -1,17 +1,36 @@
 @import "tailwindcss";
 
 @theme {
-  /* dark solder-mask + copper trace */
-  --color-ink: #0a0b0e;
-  --color-surface: #121318;
-  --color-raised: #1a1c23;
-  --color-line: rgba(255, 255, 255, 0.08);
-  --color-fg: #ededef;
-  --color-muted: #9aa0a8;
-  --color-copper: #e8a33d;
-  --color-copper-bright: #ffc46b;
-  --color-maroon: #8a2a35;
-  --color-signal: #4ade80;
+  /* Warm paper. Ground, raised and accent are Michael's colorhunt palette
+     (8b9a6e / f7f2eb / eae2d6 / eeeeee); the rest are added, because all four
+     of his are too light to carry text.
+
+     NAMING: these keys are inherited from the old dark scheme and kept on
+     purpose, so the 326 existing utility usages keep working untouched.
+     --color-ink is the BACKGROUND, --color-fg is the text. --color-copper is
+     the accent and is now sage, not copper. Rename later if it ever earns the
+     churn; right now it would touch every page. */
+  --color-ink: #f7f2eb;
+  --color-surface: #fffdf9;
+  --color-raised: #eae2d6;
+  --color-line: #e4dcd1;
+  --color-fg: #33291f;
+  --color-muted: #6b6259;
+
+  /* Michael's sage #8b9a6e is 2.71:1 on the ground, so it cannot be text and
+     it cannot take cream text on top of it. --color-copper is therefore the
+     DARKENED sage: 5.36:1 as text, and 5.36:1 the other way when it is a
+     button fill under cream. It is the base state, so it is the safe one.
+     Hover goes darker, not lighter, because the ground is light now. */
+  --color-copper: #5c6844;
+  --color-copper-bright: #475134;
+
+  /* his sage, unmodified. Decorative fills, washes and rules only. Never
+     text, never a background for text. */
+  --color-accent-soft: #8b9a6e;
+  --color-maroon: #8b9a6e;
+
+  --color-signal: #35673f;
 
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
