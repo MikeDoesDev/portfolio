@@ -1,0 +1,661 @@
+/* Phase 0 style prototype. Every token is scoped to .wrap on purpose — nothing
+   here touches globals.css, so the live dark pages keep rendering as they do
+   today while this direction is judged. Promote these into @theme only once
+   the look is approved. */
+
+.wrap {
+  /* Michael's colorhunt palette 8b9a6e / f7f2eb / eae2d6 / eeeeee */
+  --ground: #f7f2eb;
+  --raised: #eae2d6;
+  --accent: #8b9a6e;
+  --hairline: #eeeeee;
+
+  /* added — his four are all too light to carry text */
+  --ink: #33291f;
+  --quiet: #6b6259;
+
+  /* added — the warm dark that demo panels sit on. Warm (R>B) so a screen
+     reads as a deliberate device rather than a foreign object. */
+  --device: #1e1a14;
+  --device-fg: #f0e9dd;
+
+  --rule: 1px solid var(--hairline);
+  --pad: clamp(1.25rem, 5vw, 4rem);
+
+  min-height: 100vh;
+  padding: 0 var(--pad) 8rem;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  /* the page itself is light even though the site around it is dark */
+  color-scheme: light;
+}
+
+.inner {
+  max-width: 68rem;
+  margin: 0 auto;
+}
+
+/* ── page header ─────────────────────────────────────── */
+
+.masthead {
+  padding: clamp(3rem, 10vw, 6rem) 0 clamp(2rem, 6vw, 4rem);
+  border-bottom: var(--rule);
+}
+
+.kicker {
+  margin: 0;
+  color: var(--accent);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.mastheadTitle {
+  margin: 1rem 0 0;
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(2rem, 7vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+.lede {
+  max-width: 44rem;
+  margin: 1.25rem 0 0;
+  color: var(--quiet);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+/* ── sections ────────────────────────────────────────── */
+
+.section {
+  padding: clamp(3rem, 8vw, 5rem) 0;
+  border-bottom: var(--rule);
+}
+
+.sectionHead {
+  margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+  margin: 0.75rem 0 0;
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.note {
+  max-width: 46rem;
+  margin: 0.875rem 0 0;
+  color: var(--quiet);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.note code {
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  background: var(--raised);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.85em;
+}
+
+/* ── swatches ────────────────────────────────────────── */
+
+.swatchGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+  gap: 1rem;
+}
+
+.swatch {
+  overflow: hidden;
+  border: var(--rule);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.chip {
+  height: 5.5rem;
+  border-bottom: var(--rule);
+}
+
+.swatchMeta {
+  padding: 0.75rem 0.875rem 0.875rem;
+}
+
+.swatchName {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.swatchHex {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--quiet);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.swatchRole {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--quiet);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+/* ── contrast table ──────────────────────────────────── */
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 34rem;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.table th {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 2px solid var(--ink);
+  color: var(--quiet);
+  text-align: left;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.table td {
+  padding: 0.7rem 0.75rem;
+  border-bottom: var(--rule);
+  vertical-align: middle;
+}
+
+.ratio {
+  font-family: var(--font-mono), monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.pass,
+.fail {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pass {
+  color: #46662f;
+}
+
+.fail {
+  color: #9c3128;
+}
+
+/* ── type scale ──────────────────────────────────────── */
+
+.typeRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1.5rem;
+  padding: 1.25rem 0;
+  border-bottom: var(--rule);
+}
+
+.typeLabel {
+  flex: 0 0 8rem;
+  color: var(--quiet);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tDisplay {
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(2.25rem, 8vw, 4rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+
+.tTitle {
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(1.5rem, 5vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.tLede {
+  font-size: 1.125rem;
+  line-height: 1.55;
+}
+
+.tBody {
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.tMono {
+  color: var(--quiet);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* ── buttons + badges ────────────────────────────────── */
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btnPrimary,
+.btnGhost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+/* ink on sage is 4.34:1 — passes AA. cream on sage is 2.71:1 and would fail,
+   which is why the primary button takes dark type. */
+.btnPrimary {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--ink);
+}
+
+.btnPrimary:hover {
+  background: #7d8b61;
+  border-color: #7d8b61;
+}
+
+.btnGhost {
+  border: 1px solid #d9cfc0;
+  background: transparent;
+  color: var(--ink);
+}
+
+.btnGhost:hover {
+  border-color: var(--accent);
+  color: #4b5734;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.badgeDot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.bShipped {
+  border-color: #b6c79a;
+  background: #eaf0de;
+  color: #3f5a27;
+}
+
+.bProgress {
+  border-color: #dcc79a;
+  background: #f6eeda;
+  color: #6d5320;
+}
+
+.bPlanning {
+  border-color: #d3c9bb;
+  background: var(--raised);
+  color: #5d5245;
+}
+
+.bShelf {
+  border-color: #d9d9d9;
+  background: #f1f1f1;
+  color: #5f5f5f;
+}
+
+/* ── demo compositions ───────────────────────────────── */
+
+.demoFrame {
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  border: var(--rule);
+  border-radius: 14px;
+  background: #fffdf9;
+}
+
+.heroGreeting {
+  margin: 0;
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(1.9rem, 6.5vw, 3.4rem);
+  font-weight: 700;
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+}
+
+.heroNick {
+  color: var(--accent);
+}
+
+.heroLine {
+  max-width: 34rem;
+  margin: 1.25rem 0 0;
+  font-size: clamp(1.05rem, 2.6vw, 1.3rem);
+  line-height: 1.5;
+  color: var(--quiet);
+}
+
+.heroActions {
+  margin-top: 2rem;
+}
+
+/* project cards */
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 1.25rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  border: var(--rule);
+  border-radius: 12px;
+  background: #fffdf9;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cardTitle {
+  margin: 0.9rem 0 0;
+  font-family: var(--font-heading), sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.cardTagline {
+  margin: 0.3rem 0 0;
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.cardBlurb {
+  margin: 0.85rem 0 0;
+  color: var(--quiet);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 1.15rem;
+}
+
+.tag {
+  padding: 0.22rem 0.55rem;
+  border-radius: 5px;
+  background: var(--raised);
+  color: #5d5245;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.68rem;
+}
+
+.cardYear {
+  color: var(--quiet);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+/* ── the device panel — the actual open question ─────── */
+
+.deviceSplit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  gap: 1.75rem;
+}
+
+.deviceCol > h3 {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-heading), sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.deviceCaption {
+  margin: 0 0 1rem;
+  color: var(--quiet);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.device {
+  overflow: hidden;
+  border-radius: 12px;
+  /* the lip of warm paper around the screen is what makes it read as a
+     device instead of a hole in the page */
+  border: 8px solid var(--raised);
+  box-shadow: 0 18px 40px -22px rgba(51, 41, 31, 0.45);
+}
+
+.deviceBarCool,
+.deviceBarWarm {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.75rem;
+}
+
+.deviceBarCool {
+  background: #12151c;
+}
+
+.deviceBarWarm {
+  background: #2a241d;
+}
+
+.dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.deviceBodyCool,
+.deviceBodyWarm {
+  padding: 1.5rem 1.25rem 1.75rem;
+  font-family: var(--font-mono), monospace;
+}
+
+/* what the demos look like today: a cool blue-black */
+.deviceBodyCool {
+  background: #08090c;
+  color: #9aa1ad;
+}
+
+/* the proposal: warm near-black, same family as the paper */
+.deviceBodyWarm {
+  background: var(--device);
+  color: #a79c8c;
+}
+
+.deviceHeadline {
+  display: block;
+  margin-bottom: 0.9rem;
+  font-family: var(--font-heading), sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.coolHeadline {
+  color: #f3f5f8;
+}
+
+.warmHeadline {
+  color: var(--device-fg);
+}
+
+.limeNeon {
+  color: #caff4d;
+}
+
+.limeTamed {
+  color: #b7cc63;
+}
+
+.deviceMeter {
+  height: 0.45rem;
+  margin: 0.9rem 0 0.4rem;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.meterCool {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.meterWarm {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.meterFillNeon {
+  width: 68%;
+  height: 100%;
+  background: #caff4d;
+}
+
+.meterFillTamed {
+  width: 68%;
+  height: 100%;
+  background: #b7cc63;
+}
+
+.deviceSmall {
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+/* ── about-section demo ──────────────────────────────── */
+
+.aboutGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 1.5rem;
+}
+
+.aboutCol h3 {
+  margin: 0 0 0.9rem;
+  color: var(--accent);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.aboutList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.aboutList li {
+  padding: 0.5rem 0;
+  border-bottom: var(--rule);
+  font-size: 0.9375rem;
+}
+
+.aboutList li:last-child {
+  border-bottom: 0;
+}
+
+.aboutList span {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--quiet);
+  font-size: 0.8125rem;
+}
+
+.pullquote {
+  margin: 0;
+  padding-left: 1.25rem;
+  border-left: 3px solid var(--accent);
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(1.15rem, 3vw, 1.5rem);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* ── footer ──────────────────────────────────────────── */
+
+.foot {
+  padding: 3rem 0 0;
+  color: var(--quiet);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .btnPrimary,
+  .btnGhost {
+    transition: none;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+}
