@@ -13,7 +13,7 @@ const mono = JetBrains_Mono({ variable: "--font-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    default: SITE_TAGLINE ? `${SITE_NAME} — ${SITE_TAGLINE}` : SITE_NAME,
     template: `%s — ${SITE_NAME}`,
   },
   description:

@@ -66,7 +66,7 @@ const COPY = {
 
   currentlyLabel: "Currently",
   readingTitle: "Reading",
-  readingNote: "NEEDS: the title",
+  reading: ["Dune Messiah", "The Bible", "Harry Potter"],
   watchingTitle: "Watching",
   watchingNote: "NEEDS: Letterboxd link, the feed can update itself",
   followingTitle: "Following",
@@ -74,9 +74,16 @@ const COPY = {
 
   travelLabel: "Been there",
   travel: [
-    { place: "Belfast and Dublin", note: "Queen’s University, summer 2026" },
-    { place: "NEEDS: the rest", note: "Send me the list" },
+    "Ireland",
+    "Northern Ireland",
+    "Scotland",
+    "France",
+    "Spain",
+    "Italy",
+    "Canada",
+    "Cancún",
   ],
+  travelNote: "Most recently Queen’s University Belfast and AMD in Dublin, summer 2026.",
 
   closer: "Let’s build something real.",
   seeWork: "See the work",
@@ -116,6 +123,22 @@ function MiniCard({ title, note }: { title: string; note: string }) {
       <p className={`mt-0.5 text-sm ${pending ? "text-muted/60 italic" : "text-muted"}`}>
         {note}
       </p>
+    </li>
+  );
+}
+
+/** Same row shape as MiniCard, but for a title with several entries under it. */
+function StackCard({ title, items }: { title: string; items: string[] }) {
+  return (
+    <li className="border-b border-line py-3 last:border-b-0">
+      <p className="font-medium">{title}</p>
+      <ul className="mt-1 space-y-0.5">
+        {items.map((item) => (
+          <li key={item} className="text-sm text-muted">
+            {item}
+          </li>
+        ))}
+      </ul>
     </li>
   );
 }
@@ -197,7 +220,7 @@ export default function AboutPage() {
           <div>
             <SectionLabel>{COPY.currentlyLabel}</SectionLabel>
             <ul className="mt-5">
-              <MiniCard title={COPY.readingTitle} note={COPY.readingNote} />
+              <StackCard title={COPY.readingTitle} items={COPY.reading} />
               <MiniCard title={COPY.watchingTitle} note={COPY.watchingNote} />
               <MiniCard title={COPY.followingTitle} note={COPY.followingNote} />
             </ul>
@@ -205,11 +228,17 @@ export default function AboutPage() {
 
           <div>
             <SectionLabel>{COPY.travelLabel}</SectionLabel>
-            <ul className="mt-5">
-              {COPY.travel.map((t) => (
-                <MiniCard key={t.place} title={t.place} note={t.note} />
+            <ul className="mt-5 flex flex-wrap gap-2">
+              {COPY.travel.map((place) => (
+                <li
+                  key={place}
+                  className="rounded-md bg-raised px-2.5 py-1 font-mono text-xs text-fg"
+                >
+                  {place}
+                </li>
               ))}
             </ul>
+            <p className="mt-4 text-sm text-muted">{COPY.travelNote}</p>
           </div>
         </section>
       </Reveal>
