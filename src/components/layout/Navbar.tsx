@@ -13,7 +13,7 @@ export default function Navbar() {
           <Link href="/#work" className="mono-label transition-colors hover:text-fg">
             Work
           </Link>
-          <Link href="/#about" className="mono-label transition-colors hover:text-fg">
+          <Link href="/about" className="mono-label transition-colors hover:text-fg">
             About
           </Link>
           <Link href="/#contact" className="mono-label transition-colors hover:text-fg">

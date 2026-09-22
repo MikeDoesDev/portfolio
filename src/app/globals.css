@@ -73,3 +73,46 @@ a:hover > .monogram-svg .monogram-path,
   text-transform: uppercase;
   color: var(--color-muted);
 }
+
+/* Orbiting social cluster.
+   One --orbit custom property on the host drives every node, so the rAF loop
+   writes a single value per frame regardless of link count. The inner
+   counter-rotation keeps each icon upright as the ring turns. */
+.orbit-cluster {
+  /* 1.12 leaves room for the outermost scattered node. */
+  width: calc(var(--orbit-r) * 2 * 1.12 + 46px);
+  height: calc(var(--orbit-r) * 2 * 1.12 + 46px);
+}
+.orbit-node {
+  --s: 1;
+  /* scale() is appended to the orbit chain, so growing a node on hover never
+     disturbs where it sits on the ring. */
+  transform: rotate(calc((var(--a) + var(--orbit, 0)) * 1deg))
+    translate(calc(var(--orbit-r) * var(--rf, 1)))
+    rotate(calc((var(--a) + var(--orbit, 0)) * -1deg))
+    scale(var(--s));
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+.orbit-node:hover,
+.orbit-node:focus-visible {
+  --s: 1.25;
+  z-index: 5;
+}
+
+/* Brand marks carry their own colour; utility links take the site accent.
+   Only --orbit-ic-github changes on a light ground. */
+.orbit-ic-github {
+  color: var(--color-fg);
+}
+.orbit-ic-linkedin {
+  color: #0a66c2;
+}
+.orbit-ic-handshake,
+.orbit-ic-util {
+  color: var(--color-copper);
+}
+@media (prefers-reduced-motion: reduce) {
+  .orbit-node {
+    transition: none;
+  }
+}
