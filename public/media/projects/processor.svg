@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+<rect width="1280" height="720" fill="#eae2d6"/>
+<g fill="#33291f" font-family="monospace">
+<text x="80" y="105" font-size="20" letter-spacing="3">ECEN 350 / VERILOG SIMULATION</text>
+<text x="80" y="184" font-size="42">One instruction. One cycle.</text>
+<path d="M80 235H1200" stroke="#b7ad9c"/>
+<text x="80" y="305" font-size="24">MOVZ × 4 → ORR × 3 → STUR → LDUR</text>
+<text x="80" y="410" font-size="52">0x123456789abcdef0</text>
+<text x="80" y="465" font-size="22" fill="#6b6259">Loaded result at PC 0x54</text>
+<rect x="80" y="530" width="1120" height="92" rx="4" fill="#f7f2eb"/>
+<text x="110" y="586" font-size="25" fill="#475134">Program 1: PASS</text>
+<text x="650" y="586" font-size="25" fill="#475134">Program 2: PASS</text>
+<text x="80" y="670" font-size="18" fill="#6b6259">Icarus Verilog · directed tests · verified 23 Sep 2026</text>
+</g></svg>

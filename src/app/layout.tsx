@@ -1,15 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import IntroOverlay from "@/components/intro/IntroOverlay";
+import NodeGraphBackground from "@/components/layout/NodeGraphBackground";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/site";
 
-const heading = Space_Grotesk({ variable: "--font-heading", subsets: ["latin"] });
+const heading = Space_Grotesk({ variable: "--font-display-family", subsets: ["latin"] });
 const body = Inter({ variable: "--font-body", subsets: ["latin"] });
-const mono = JetBrains_Mono({ variable: "--font-mono", subsets: ["latin"] });
+const mono = JetBrains_Mono({ variable: "--font-code-family", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
@@ -31,13 +30,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${heading.variable} ${body.variable} ${mono.variable} antialiased`}>
-      <body className="flex min-h-screen flex-col">
-        <Script id="intro-flag" strategy="beforeInteractive">
-          {`try{if(localStorage.getItem('amc-intro-seen'))document.documentElement.dataset.intro='seen'}catch(e){}`}
-        </Script>
-        <IntroOverlay />
+      <body id="top" className="flex min-h-screen flex-col">
+        <NodeGraphBackground page />
+        <a href="#main-content" className="skip-link">Skip to content</a>
         <Navbar />
-        <main className="flex-1">{children}</main>
+        <main id="main-content" tabIndex={-1} className="flex-1">{children}</main>
         <Footer />
       </body>
     </html>

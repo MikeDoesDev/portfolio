@@ -1,62 +1,16 @@
 "use client";
-
 import { useRef, useState } from "react";
-import { useInView } from "motion/react";
-
-interface EmbedFrameProps {
-  src: string;
-  title: string;
-  /** Aspect ratio as `width / height`, e.g. 16 / 10. */
-  aspect?: number;
-}
-
-/**
- * Lazy iframe: mounts the embed only when scrolled near the viewport,
- * with a fullscreen button. Used for self-contained demos in /public/demos.
- */
+interface EmbedFrameProps { src: string; title: string; aspect?: number }
 export default function EmbedFrame({ src, title, aspect = 16 / 10 }: EmbedFrameProps) {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const frameRef = useRef<HTMLIFrameElement>(null);
-  const inView = useInView(wrapRef, { margin: "40% 0px" });
-  const [loaded, setLoaded] = useState(false);
-
-  return (
-    /* The demos are self-contained dark pages. On a cream ground a bare dark
-       rectangle reads as a hole in the paper, so it gets a lip of raised tan
-       around it and it reads as a screen instead. */
-    <div
-      ref={wrapRef}
-      className="relative overflow-hidden rounded-xl border-8 border-raised bg-[#1e1a14] shadow-[0_18px_40px_-22px_rgba(51,41,31,0.45)]"
-      style={{ aspectRatio: aspect }}
-    >
-      {inView ? (
-        <>
-          <iframe
-            ref={frameRef}
-            src={src}
-            title={title}
-            loading="lazy"
-            onLoad={() => setLoaded(true)}
-            className="h-full w-full"
-          />
-          <button
-            type="button"
-            onClick={() => frameRef.current?.requestFullscreen?.()}
-            className="absolute right-3 top-3 rounded-md border border-line bg-ink/80 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-muted backdrop-blur transition-colors hover:text-fg"
-          >
-            Fullscreen
-          </button>
-          {!loaded && (
-            <p className="absolute inset-0 flex items-center justify-center font-mono text-sm text-[#a79c8c]">
-              Loading demo…
-            </p>
-          )}
-        </>
-      ) : (
-        <p className="absolute inset-0 flex items-center justify-center font-mono text-sm text-[#a79c8c]">
-          Demo loads when visible
-        </p>
-      )}
-    </div>
-  );
+  const frame = useRef<HTMLIFrameElement>(null);
+  const [active, setActive] = useState(false);
+  const [notice, setNotice] = useState("");
+  async function fullscreen() {
+    try {
+      if (!frame.current?.requestFullscreen) throw new Error("Unavailable");
+      await frame.current.requestFullscreen();
+      setNotice("");
+    } catch { setNotice("Fullscreen isn’t available here. You can open the demo in a new tab instead."); }
+  }
+  return <div className="demo-shell"><div className="demo-toolbar"><span>{title}</span><a className="text-link" href={src} target="_blank" rel="noopener noreferrer">Open in new tab</a></div><div className="demo-viewport" style={{ aspectRatio: aspect }}>{active ? <iframe ref={frame} src={src} title={title} allow="fullscreen" onError={() => setNotice("The demo couldn’t load. Try opening it in a new tab.")} /> : <div className="demo-start"><p>Explore the working demo</p><button className="button-primary" type="button" onClick={() => setActive(true)}>Load demo</button><p className="demo-hint">Loads when you choose. Your place on this page stays here.</p></div>}</div><div className="demo-bottom">{active && <button type="button" className="text-link" onClick={fullscreen}>Fullscreen</button>}<p>{active ? "If the demo is blank or unavailable, use the direct link above." : "The demo is separate from the portfolio."}</p></div>{notice && <p className="demo-notice" role="status">{notice}</p>}</div>;
 }

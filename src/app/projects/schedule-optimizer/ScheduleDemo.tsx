@@ -390,8 +390,7 @@ export default function ScheduleDemo() {
         </div>
 
         <p className="mt-8 border-t border-line pt-5 font-mono text-xs leading-relaxed text-muted">
-          Real engine, real data — the same scoring that ranks my actual schedule, running in
-          your browser.
+          Sample course data, scored in your browser. These are not current course listings or live seat counts.
         </p>
       </div>
 

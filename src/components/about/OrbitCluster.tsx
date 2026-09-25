@@ -7,6 +7,7 @@ import type { CSSProperties } from "react";
 /* ────────────────────────── icons ────────────────────────── */
 
 const ICONS = {
+  letterboxd: (<g><circle cx="6" cy="12" r="5" fill="#ff8000"/><circle cx="12" cy="12" r="5" fill="#00e054"/><circle cx="18" cy="12" r="5" fill="#40bcf4"/></g>),
   github: (
     <path
       fill="currentColor"
@@ -62,6 +63,7 @@ export type OrbitIcon = keyof typeof ICONS;
  *  (email, résumé) take the site accent so they read as ours, not a third party's.
  *  Defined in globals.css so a light-ground theme only has to flip one place. */
 const TONE: Record<OrbitIcon, string> = {
+  letterboxd: "",
   github: "orbit-ic-github",
   linkedin: "orbit-ic-linkedin",
   instagram: "", // gradient
@@ -119,7 +121,7 @@ export default function OrbitCluster({
   photoAlt = "Portrait",
   radius = 122,
   fullSpeed = 12,
-  calmRadius = 80,
+  calmRadius = 190,
   runway = 20,
   curve = 1,
   scatter = 0.1,
@@ -177,7 +179,7 @@ export default function OrbitCluster({
 
       // Lerp the speed rather than the angle: the ring winds down as you
       // approach instead of freezing, which otherwise reads as a bug.
-      speed += (target - speed) * 0.08;
+      speed = held || !visible ? 0 : speed + (target - speed) * 0.08;
       angle = (angle + speed * dt) % 360;
       host.style.setProperty("--orbit", angle.toFixed(2));
 
@@ -217,20 +219,19 @@ export default function OrbitCluster({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={photoSrc} alt={photoAlt} width={272} height={272} className="size-full object-cover" />
         ) : (
-          <svg viewBox="0 0 24 24" className="size-full p-8 text-muted/50" aria-label="Portrait placeholder" role="img">
-            <g fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
-              <circle cx="12" cy="8.6" r="4.1" />
-              <path d="M3.9 21.2c0-4.3 3.7-6.9 8.1-6.9s8.1 2.6 8.1 6.9" />
-            </g>
-          </svg>
+          <span className="orbit-monogram" aria-label="Andrew Michael Coggins">amc<span>.</span></span>
         )}
       </div>
 
       {links.map((link, i) => (
         <a
           key={link.label}
-          href={link.href}
-          aria-label={link.label}
+          href={link.href || undefined}
+          role={link.href ? undefined : "link"}
+          aria-disabled={!link.href || undefined}
+          tabIndex={link.href ? undefined : 0}
+          title={link.href ? link.label : `${link.label} · link coming soon`}
+          aria-label={link.href ? link.label : `${link.label}, link coming soon`}
           {...(link.external ? { target: "_blank", rel: "noreferrer" } : {})}
           className="orbit-node absolute left-1/2 top-1/2 -ml-[23px] -mt-[23px] grid size-[46px] place-items-center rounded-full border border-line bg-surface focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-copper"
           style={
@@ -243,6 +244,7 @@ export default function OrbitCluster({
           <svg viewBox="0 0 24 24" className={`size-5 ${TONE[link.icon]}`} aria-hidden="true">
             {ICONS[link.icon]}
           </svg>
+          <span className="orbit-label">{link.label}{!link.href && <small>Coming soon</small>}</span>
         </a>
       ))}
     </div>
