@@ -42,3 +42,8 @@ next-env.d.ts
 
 # Local execution scratch, including private course-source verification copies
 /.superpowers/
+
+# Private working notes: interview background, critiques, plans, agent brief
+/context/
+/docs/
+/CLAUDE.md

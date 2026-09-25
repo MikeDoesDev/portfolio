@@ -18,4 +18,4 @@ Next.js 16.2.10 is installed. Read `AGENTS.md` and the relevant guides under `no
 
 `src/content/copy.ts` contains personal prose. `projects.ts` defines project order and assets. `case-studies.ts` contains project narratives. Contact and resume paths are in `src/lib/site.ts`. Shared styling is in `src/app/globals.css`; `/styleguide` previews the components.
 
-See `docs/portfolio-evidence.md` for factual sources and `docs/portfolio-verification.md` for the latest validation. Demos use sample or prototype data, as labeled on their pages. No public deployment is included in this change.
+Demos use sample or prototype data, as labeled on their pages.
