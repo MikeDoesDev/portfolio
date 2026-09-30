@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import NodeGraphBackground from "@/components/layout/NodeGraphBackground";
+import ScrollProgress from "@/components/layout/ScrollProgress";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/site";
 
 const heading = Space_Grotesk({ variable: "--font-display-family", subsets: ["latin"] });
@@ -32,6 +33,7 @@ export default function RootLayout({
     <html lang="en" className={`${heading.variable} ${body.variable} ${mono.variable} antialiased`}>
       <body id="top" className="flex min-h-screen flex-col">
         <NodeGraphBackground page />
+        <ScrollProgress />
         <a href="#main-content" className="skip-link">Skip to content</a>
         <Navbar />
         <main id="main-content" tabIndex={-1} className="flex-1">{children}</main>
